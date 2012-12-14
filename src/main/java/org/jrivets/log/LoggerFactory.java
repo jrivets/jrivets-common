@@ -1,5 +1,11 @@
 package org.jrivets.log;
 
+/**
+ * The logger factory produces Log4j wrappers.
+ * 
+ * @author Dmitry Spasibenko 
+ *
+ */
 public class LoggerFactory {
     private LoggerFactory() {
         throw new AssertionError("LoggerFactory is class with static methods only");
@@ -7,8 +13,9 @@ public class LoggerFactory {
 
     /**
      * Returns Logger instance which wraps Log4j Logger with a purpose to add some formatting there.
-     * The parameters will be fed to <code>String.format(formatString, marker, message)</code> which
-     * result is printed to the log then.   
+     * The parameters will be fed to <code>String.format(formatString, marker, message)</code> whose
+     * result will be printed to the log then.
+     *    
      * @param clazz
      * @param formatString
      * @param marker
