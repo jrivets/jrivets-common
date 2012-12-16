@@ -1,10 +1,11 @@
 package org.jrivets.log;
 
 /**
- * The logger factory produces Log4j wrappers.
+ * The logger factory produces {@link Logger} instances which utilize Log4j
+ * functionality.
  * 
- * @author Dmitry Spasibenko 
- *
+ * @author Dmitry Spasibenko
+ * 
  */
 public class LoggerFactory {
     private LoggerFactory() {
@@ -12,10 +13,11 @@ public class LoggerFactory {
     }
 
     /**
-     * Returns Logger instance which wraps Log4j Logger with a purpose to add some formatting there.
-     * The parameters will be fed to <code>String.format(formatString, marker, message)</code> whose
-     * result will be printed to the log then.
-     *    
+     * Returns Logger instance which wraps Log4j Logger with a purpose to add
+     * some formatting there. The parameters will be fed to
+     * <code>String.format(formatString, marker, message)</code> whose result
+     * will be printed to the log then.
+     * 
      * @param clazz
      * @param formatString
      * @param marker
@@ -24,11 +26,11 @@ public class LoggerFactory {
     public static <T> Logger getLogger(Class<T> clazz, String formatString, Object marker) {
         return new Log4jLoggerAdapter(org.apache.log4j.Logger.getLogger(clazz), formatString, marker);
     }
-    
+
     public static <T> Logger getLogger(Class<T> clazz) {
         return new Log4jLoggerAdapter(org.apache.log4j.Logger.getLogger(clazz), null, null);
     }
-    
+
     public static Logger getLogger(String name, String formatString, Object marker) {
         return new Log4jLoggerAdapter(org.apache.log4j.Logger.getLogger(name), formatString, marker);
     }
