@@ -79,6 +79,9 @@ public class SerialChannelTest {
         while (counter.get() < 20) {
             Thread.sleep(10L);
         }
+        while (events.size() < 20) {
+            Thread.sleep(10L);
+        }
         assertEquals(20, events.size());
         for (int i = 0; i < 20 ; i++) {
             assertEquals(new Integer(i), events.get(i));
