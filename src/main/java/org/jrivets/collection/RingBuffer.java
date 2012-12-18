@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Ring Buffer is a container with fixed capacity and FIFO discipline: elements
- * can be added to the end of the buffer and obtained from the head only. The
+ * can be added to the end of the buffer and removed from the head only. The
  * <tt>RingBuffer</tt> implements {@link Collection} interface to be used easily
  * in some iteration routines, but some methods for modification the collection
  * like <tt>addAll()</tt>, <tt>removeAll()</tt> etc. are not supported and will
