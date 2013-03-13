@@ -25,13 +25,10 @@ final class SubscriberTypeParser {
     private SubscriberTypeDetails parseNewType(Class<?> clazz) {
         logger.info("Parsing class ", clazz);
         Map<Class<?>, Method> eventsMap = new HashMap<Class<?>, Method>();
-        while(true) {
-            parseType(clazz, eventsMap);
-            if (clazz.getSuperclass() != null) {
-                clazz = clazz.getSuperclass();
-            } else {
-                break;
-            }
+        Class<?> clz = clazz;
+        while(clz != null) {
+            parseType(clz, eventsMap);
+            clz = clz.getSuperclass();
         }
         if (eventsMap.size() == 0) {
             onError("The class " + clazz + " cannot be used like subscriber: no methods annoteated by @OnEvent annotation.");

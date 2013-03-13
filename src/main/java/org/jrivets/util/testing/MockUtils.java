@@ -151,17 +151,55 @@ public final class MockUtils {
         return null;
     }
 
+    public static <E> String objectToString(E e) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(e.getClass()).append(": {");
+        printFields(e, sb, true);
+        sb.append("}");
+        return sb.toString();
+    }
+    
+    public static <E> void printFields(E e, StringBuilder sb, boolean includeSuperClasses) {
+        printFields(e.getClass(), e, sb, includeSuperClasses);
+    }
+    
+    public static <E> void printFields(Class<?> clazz, E e, StringBuilder sb, boolean includeSuperClasses) {
+        while (clazz != null) {
+            printFields(clazz, e, sb);
+            clazz = includeSuperClasses ? clazz.getSuperclass() : null;
+        }
+    }
+    
+    public static <E> void printFields(Class<?> clazz, E e, StringBuilder sb) {
+        boolean comma = false;
+        for (Field field: clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            String name = field.getName();
+            if (comma) {
+                sb.append(", ");
+            }
+            sb.append(name).append("=");
+            try {
+                Object value = field.get(e);
+                sb.append(value);
+            } catch (Exception ex) {
+                sb.append("<<<N/A>>>");
+            }
+            comma = true;
+        }
+    }
+
     public static <E> Object invoke(E e, String methodName) {
         return invoke(e, methodName, new Object[0]);
     }
-
+    
     @SuppressWarnings("unchecked")
     public static <E> Object invoke(E e, String methodName, Object... params) {
         Class<E> clazz = (Class<E>) e.getClass();
         try {
             Method method = clazz.getDeclaredMethod(methodName, paramsClasses(params));
             method.setAccessible(true);
-            return method.invoke(e, new Object[0]);
+            return method.invoke(e, params);
         } catch (Exception ex) {
             throw new RuntimeException("Cannot execute " + methodName, ex);
         }
