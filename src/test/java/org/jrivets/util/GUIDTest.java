@@ -92,6 +92,15 @@ public class GUIDTest {
         goodStringTest("00000000FFFFFFFFF00000000FFFFFFF");
     }
     
+    @Test
+    public void msbLsbTest() {
+        GUID id = new GUID("FFFFFFFFFFFFFFFF0000000000000000");
+        assertEquals(-1L, id.getMSB());
+        assertEquals(0L, id.getLSB());
+        id = new GUID(0L, -1L);
+        assertEquals("0000000000000000ffffffffffffffff", id.toString());
+    }
+    
     private void goodStringTest(String strId) {
         GUID id = new GUID(strId);
         GUID id2 = new GUID(id);

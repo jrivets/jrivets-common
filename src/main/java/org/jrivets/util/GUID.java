@@ -47,9 +47,17 @@ public final class GUID implements Serializable {
         this.hashCode = guid.hashCode;
     }
 
-    private GUID(long l1, long l2) {
+    public GUID(long l1, long l2) {
         this.mostSigBits = l1;
         this.leastSigBits = l2;
+    }
+    
+    public long getMSB() {
+        return mostSigBits;
+    }
+    
+    public long getLSB() {
+        return leastSigBits;
     }
 
     @Override
