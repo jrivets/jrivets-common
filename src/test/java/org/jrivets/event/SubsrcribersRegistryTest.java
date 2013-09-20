@@ -4,10 +4,10 @@ import org.jrivets.event.OnEvent;
 import org.jrivets.event.Subscriber;
 import org.jrivets.event.SubscriberTypeParser;
 import org.jrivets.event.SubscribersRegistry;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class SubsrcribersRegistryTest {
 
@@ -15,7 +15,7 @@ public class SubsrcribersRegistryTest {
     
     private SubscriberTypeParser typeParser = new SubscriberTypeParser();
     
-    @Before
+    @BeforeMethod
     public void init() {
         registry = new SubscribersRegistry(typeParser);
     }

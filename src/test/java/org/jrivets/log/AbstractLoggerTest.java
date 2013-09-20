@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jrivets.log.AbstractLogger.LogLevel;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class AbstractLoggerTest {
 
@@ -42,7 +42,7 @@ public class AbstractLoggerTest {
         }
     }
     
-    @Before
+    @BeforeMethod
     public void initSimple() {
         this.logger = new TestLogger(null, null);
     }

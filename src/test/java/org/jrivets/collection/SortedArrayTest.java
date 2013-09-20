@@ -1,6 +1,6 @@
 package org.jrivets.collection;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import org.jrivets.collection.SortedArray;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class SortedArrayTest {
 
@@ -72,7 +72,7 @@ public class SortedArrayTest {
         assertTrue(sa.get(2) == 1);
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void get() {
         new SortedArray<Integer>().get(0);
     }
@@ -146,7 +146,7 @@ public class SortedArrayTest {
         assertEquals(1, sa.size());
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void removeByIndex2() {
         SortedArray<Integer> sa = new SortedArray<Integer>();
         sa.add(1);

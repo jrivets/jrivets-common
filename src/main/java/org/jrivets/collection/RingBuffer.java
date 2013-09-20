@@ -20,8 +20,7 @@ import java.util.NoSuchElementException;
  * synchronized externally <strong>except the use case as follows:</strong>
  * <p>
  * If one thread is reader (uses <tt>removeFirst()</tt>, <tt>capacity()</tt> and
- * <tt>size()</tt> methods only), and another one is writer (uses <tt>add()</tt>, 
- * <tt>capacity()</tt> and <tt>size()</tt> methods only), the methods can be
+ * <tt>size()</tt> methods only), and another one is writer (uses <tt>add()</tt>, <tt>capacity()</tt> and <tt>size()</tt> methods only), the methods can be
  * called without any synchronization. For all other scenarios the buffer is not
  * thread-safe, so methods invocations should be properly guarded in case of
  * multi-threads usage.
@@ -144,6 +143,11 @@ public final class RingBuffer<T> implements Collection<T>, Serializable {
         return values[correctIdx(tailIdx - 1)];
     }
 
+    /**
+     * The method is safe for 1 reader, 1 writer threads if and only if one of
+     * the threads calls the method. It is safe this case because for the
+     * execution only head or tail index can be changed.
+     */
     @Override
     public int size() {
         int head = headIdx;

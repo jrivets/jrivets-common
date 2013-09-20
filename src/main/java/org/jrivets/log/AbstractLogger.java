@@ -66,15 +66,90 @@ public abstract class AbstractLogger implements Logger {
     }
 
     @Override
+    public void info(Object o1) {
+        logWithLevel(LogLevel.INFO, o1);
+    }
+    
+    @Override
+    public void info(Object o1, Object o2) {
+        logWithLevel(LogLevel.INFO, o1, o2);
+    }
+    
+    @Override
+    public void info(Object o1, Object o2, Object o3) {
+        logWithLevel(LogLevel.INFO, o1, o2, o3);
+    }
+    
+    @Override
+    public void info(Object o1, Object o2, Object o3, Object o4) {
+        logWithLevel(LogLevel.INFO, o1, o2, o3, o4);
+    }
+    
+    @Override
+    public void info(Object o1, Object o2, Object o3, Object o4, Object o5) {
+        logWithLevel(LogLevel.INFO, o1, o2, o3, o4, o5);
+    }
+    
+    @Override
     public void info(Object... args) {
         logWithLevel(LogLevel.INFO, args);
     }
 
     @Override
+    public void debug(Object o1) {
+        logWithLevel(LogLevel.DEBUG, o1);
+    }
+    
+    @Override
+    public void debug(Object o1, Object o2) {
+        logWithLevel(LogLevel.DEBUG, o1, o2);
+    }
+    
+    @Override
+    public void debug(Object o1, Object o2, Object o3) {
+        logWithLevel(LogLevel.DEBUG, o1, o2, o3);
+    }
+    
+    @Override
+    public void debug(Object o1, Object o2, Object o3, Object o4) {
+        logWithLevel(LogLevel.DEBUG, o1, o2, o3, o4);
+    }
+    
+    @Override
+    public void debug(Object o1, Object o2, Object o3, Object o4, Object o5) {
+        logWithLevel(LogLevel.DEBUG, o1, o2, o3, o4, o5);
+    }
+    
+    @Override
     public void debug(Object... args) {
         logWithLevel(LogLevel.DEBUG, args);
     }
 
+    @Override
+    public void trace(Object o1) {
+        logWithLevel(LogLevel.TRACE, o1);
+    }
+    
+    @Override
+    public void trace(Object o1, Object o2) {
+        logWithLevel(LogLevel.TRACE, o1, o2);
+    }
+    
+    @Override
+    public void trace(Object o1, Object o2, Object o3) {
+        logWithLevel(LogLevel.TRACE, o1, o2, o3);
+    }
+    
+    @Override
+    public void trace(Object o1, Object o2, Object o3, Object o4) {
+        logWithLevel(LogLevel.TRACE, o1, o2, o3, o4);
+    }
+    
+    @Override
+    public void trace(Object o1, Object o2, Object o3, Object o4, Object o5) {
+        logWithLevel(LogLevel.TRACE, o1, o2, o3, o4, o5);
+    }
+    
     @Override
     public void trace(Object... args) {
         logWithLevel(LogLevel.TRACE, args);
@@ -105,6 +180,33 @@ public abstract class AbstractLogger implements Logger {
             return new SimpleLogInvoker();
         }
         return new FormattedLogInvoker(formatString);
+    }
+
+    private void logWithLevel(LogLevel logLevel, Object o1) {
+        if (isEnabled(logLevel)) {
+            logInvoker.logMessage(logLevel, Formatter.concatArgs(o1));
+        }
+    }
+    
+    private void logWithLevel(LogLevel logLevel, Object o1, Object o2) {
+        if (isEnabled(logLevel)) {
+            logInvoker.logMessage(logLevel, Formatter.concatArgs(o1, o2));
+        }
+    }
+    private void logWithLevel(LogLevel logLevel, Object o1, Object o2, Object o3) {
+        if (isEnabled(logLevel)) {
+            logInvoker.logMessage(logLevel, Formatter.concatArgs(o1, o2, o3));
+        }
+    }
+    private void logWithLevel(LogLevel logLevel, Object o1, Object o2, Object o3, Object o4) {
+        if (isEnabled(logLevel)) {
+            logInvoker.logMessage(logLevel, Formatter.concatArgs(o1, o2, o3, o4));
+        }
+    }
+    private void logWithLevel(LogLevel logLevel, Object o1, Object o2, Object o3, Object o4, Object o5) {
+        if (isEnabled(logLevel)) {
+            logInvoker.logMessage(logLevel, Formatter.concatArgs(o1, o2, o3, o4, o5));
+        }
     }
 
     private void logWithLevel(LogLevel logLevel, Object... args) {

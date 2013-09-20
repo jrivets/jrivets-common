@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jrivets.event.OnEvent;
 import org.jrivets.event.SerialEventChannel;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class SerialChannelTest {
 
@@ -21,10 +21,11 @@ public class SerialChannelTest {
     
     private ArrayList<Integer> events = new ArrayList<Integer>();
     
-    @Before
+    @BeforeMethod
     public void init() {
         channel = new SerialEventChannel("testChannel", 10, executor);
         channel.addSubscriber(this);
+        events.clear();
     }
     
     @SuppressWarnings("unused")

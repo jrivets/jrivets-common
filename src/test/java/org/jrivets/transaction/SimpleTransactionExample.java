@@ -1,11 +1,11 @@
 package org.jrivets.transaction;
 
 import java.io.IOException;
+import static org.testng.Assert.*;
 
 import org.jrivets.util.testing.Example;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class SimpleTransactionExample {
 
@@ -58,6 +58,14 @@ public class SimpleTransactionExample {
     private boolean step2RollbackThrows;
     
     private boolean step2Throws;
+    
+    @BeforeMethod
+    void init() {
+        result = null;
+        step1Throws = false;
+        step2RollbackThrows = false;
+        step2Throws = false;
+    }
     
     // Time to check simpleTransactionCode() correctness
     @Test

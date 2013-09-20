@@ -6,6 +6,26 @@ public final class Formatter {
         throw new AssertionError("Formatter is static class, cannot be instantiated.");
     }
 
+    public static String concatArgs(Object o1) {
+        return parseOneArg(o1);
+    }
+    
+    public static String concatArgs(Object o1, Object o2) {
+        return parseOneArg(o1) + parseOneArg(o2);
+    }
+    
+    public static String concatArgs(Object o1, Object o2, Object o3) {
+        return parseOneArg(o1) + parseOneArg(o2) + parseOneArg(o3);
+    }
+
+    public static String concatArgs(Object o1, Object o2, Object o3, Object o4) {
+        return parseOneArg(o1) + parseOneArg(o2) + parseOneArg(o3) + parseOneArg(o4);
+    }
+
+    public static String concatArgs(Object o1, Object o2, Object o3, Object o4, Object o5) {
+        return parseOneArg(o1) + parseOneArg(o2) + parseOneArg(o3) + parseOneArg(o4) + parseOneArg(o5);
+    }
+
     public static String concatArgs(Object... args) {
         if (args == null) {
             return "null";

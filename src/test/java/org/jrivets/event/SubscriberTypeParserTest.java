@@ -5,9 +5,9 @@ import java.lang.reflect.Method;
 import org.jrivets.event.OnEvent;
 import org.jrivets.event.SubscriberTypeDetails;
 import org.jrivets.event.SubscriberTypeParser;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class SubscriberTypeParserTest {
     

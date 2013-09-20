@@ -3,6 +3,8 @@ package org.jrivets.event;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jrivets.log.Logger;
 import org.jrivets.log.LoggerFactory;
@@ -11,15 +13,32 @@ final class SubscriberTypeParser {
 
     private final Logger logger = LoggerFactory.getLogger(SubscriberTypeParser.class);
     
-    private final Map<Class<?>, SubscriberTypeDetails> subscriberTypes = new HashMap<Class<?>, SubscriberTypeDetails>();
+    private final Lock lock = new ReentrantLock();
+    
+    private Map<Class<?>, SubscriberTypeDetails> subscriberTypes = new HashMap<Class<?>, SubscriberTypeDetails>(0);
     
     SubscriberTypeDetails getSubscriberTypeDetails(Class<?> subscriberType) {
         SubscriberTypeDetails details = subscriberTypes.get(subscriberType);
         if (details == null) {
-            details = parseNewType(subscriberType);
-            subscriberTypes.put(subscriberType, details);
+            details = getNewSubscriberTypeDetails(subscriberType);
         }
         return details;
+    }
+    
+    private SubscriberTypeDetails getNewSubscriberTypeDetails(Class<?> subscriberType) {
+        lock.lock();
+        try {
+            SubscriberTypeDetails details = subscriberTypes.get(subscriberType);
+            if (details == null) {
+                Map<Class<?>, SubscriberTypeDetails> newMap = new HashMap<Class<?>, SubscriberTypeDetails>(subscriberTypes);
+                details = parseNewType(subscriberType);
+                newMap.put(subscriberType, details);
+                subscriberTypes = newMap;
+            }
+            return details;
+        } finally {
+            lock.unlock();
+        }
     }
     
     private SubscriberTypeDetails parseNewType(Class<?> clazz) {

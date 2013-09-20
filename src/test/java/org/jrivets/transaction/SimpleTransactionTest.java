@@ -1,11 +1,11 @@
 package org.jrivets.transaction;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 import org.jrivets.transaction.Action;
 import org.jrivets.transaction.FailedTransactionException;
 import org.jrivets.transaction.SimpleTransaction;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class SimpleTransactionTest {
 

@@ -8,3 +8,4 @@
 *.iws
 .idea
 target/
+test-output/

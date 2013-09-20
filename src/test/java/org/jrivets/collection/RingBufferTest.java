@@ -1,6 +1,6 @@
 package org.jrivets.collection;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,17 +11,17 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.jrivets.collection.RingBuffer;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class RingBufferTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void zeroCapacity() {
         @SuppressWarnings("unused")
         RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void negativeCapacity() {
         @SuppressWarnings("unused")
         RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(-10);
@@ -65,7 +65,7 @@ public class RingBufferTest {
         }
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expectedExceptions = NoSuchElementException.class)
     public void firstTest() {
         new RingBuffer<Integer>(3).first();
     }
@@ -80,7 +80,7 @@ public class RingBufferTest {
         assertTrue(ringBuffer.size() == 2);
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expectedExceptions = NoSuchElementException.class)
     public void lastTest() {
         new RingBuffer<Integer>(3).last();
     }
@@ -94,7 +94,7 @@ public class RingBufferTest {
         assertTrue(ringBuffer.last() == 2);
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expectedExceptions = NoSuchElementException.class)
     public void removeFirst() {
         new RingBuffer<Integer>(3).removeFirst();
     }
