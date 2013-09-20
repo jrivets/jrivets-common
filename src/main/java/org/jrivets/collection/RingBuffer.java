@@ -19,12 +19,12 @@ import java.util.NoSuchElementException;
  * least one of the threads modifies the list structurally, it <i>must</i> be
  * synchronized externally <strong>except the use case as follows:</strong>
  * <p>
- * If one thread is reader (uses <tt>removeFirst()</tt> and <tt>size()</tt>
- * methods only), and another one is writer (uses <tt>add()</tt> and
- * <tt>size()</tt> methods only), the methods can be called without any
- * synchronization. For all other scenarios the buffer is not thread-safe, so
- * methods invocations should be properly guarded in case of multi-threads
- * usage.
+ * If one thread is reader (uses <tt>removeFirst()</tt>, <tt>capacity()</tt> and
+ * <tt>size()</tt> methods only), and another one is writer (uses <tt>add()</tt>, 
+ * <tt>capacity()</tt> and <tt>size()</tt> methods only), the methods can be
+ * called without any synchronization. For all other scenarios the buffer is not
+ * thread-safe, so methods invocations should be properly guarded in case of
+ * multi-threads usage.
  * 
  * @author Dmitry Spasibenko
  * 

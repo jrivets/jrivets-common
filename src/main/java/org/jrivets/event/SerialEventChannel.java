@@ -159,13 +159,11 @@ public final class SerialEventChannel implements EventChannel {
 
     private void notifyListeners() {
         logger.trace("Notify listeners");
-        Object e = getEvent();
-        while (e != null) {
+        for (Object e = getEvent(); e != null; e = getEvent()) {
             logger.debug("Notify listeners about the event: ", e);
             for (Subscriber subscriber : subscribersRegistry.getSubscribers()) {
                 subscriber.notify(e);
             }
-            e = getEvent();
         }
         logger.trace("No events in the queue, release the notification thread.");
     }
