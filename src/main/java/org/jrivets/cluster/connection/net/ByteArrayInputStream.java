@@ -1,11 +1,11 @@
-package org.jrivets.cluster.connection;
+package org.jrivets.cluster.connection.net;
 
 /**
  * Exact non-tread safe copy-past of java.io.ByteArrayInputStream. 
  * 
  *  @author Dmitry Spasibenko 
  */
-public final class ByteArrayInputStream extends java.io.ByteArrayInputStream {
+final class ByteArrayInputStream extends java.io.ByteArrayInputStream {
 
     public ByteArrayInputStream(byte[] buf) {
         super(buf);

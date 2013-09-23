@@ -25,6 +25,11 @@ public class SubscriberTest {
         void onException(Exception ex) throws IllegalArgumentException {
             throw new IllegalArgumentException();
         }
+        
+        @OnEvent
+        void onException(InterruptedException ie) throws InterruptedException {
+            throw ie;
+        }
     }
     
     private Subscriber subscriber;
@@ -59,6 +64,14 @@ public class SubscriberTest {
     @Test
     public void internalExceptionSilentlyTest() {
         assertEquals(subscriber.notifySubscriberSilently(new Exception()).getClass(), InvocationTargetException.class);
+    }
+    
+    @Test
+    public void internalInterruptedExceptionSilentlyTest() {
+        InterruptedException cause = new InterruptedException();
+        Object result = subscriber.notifySubscriberSilently(cause);
+        assertEquals(result.getClass(), InvocationTargetException.class);
+        assertEquals(((InvocationTargetException) result).getCause(), cause); 
     }
     
     @Test

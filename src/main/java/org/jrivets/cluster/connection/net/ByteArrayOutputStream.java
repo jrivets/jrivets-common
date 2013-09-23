@@ -1,10 +1,10 @@
-package org.jrivets.cluster.connection;
+package org.jrivets.cluster.connection.net;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-public final class ByteArrayOutputStream extends OutputStream {
+final class ByteArrayOutputStream extends OutputStream {
     
     private int capacity;
     
@@ -14,11 +14,11 @@ public final class ByteArrayOutputStream extends OutputStream {
     
     private final ArrayList<byte[]> buffers = new ArrayList<byte[]>(3);
     
-    public ByteArrayOutputStream() {
+    ByteArrayOutputStream() {
         this(256);
     }
 
-    public ByteArrayOutputStream(int size) {
+    ByteArrayOutputStream(int size) {
         if (size <= 0) {
             throw new IllegalArgumentException("Size should be positive integer. size=" + size);
         }
@@ -57,8 +57,12 @@ public final class ByteArrayOutputStream extends OutputStream {
         }
     }
     
-    public int size() {
+    int size() {
         return capacity - buffer.length + position;
+    }
+    
+    int capacity() {
+        return capacity;
     }
     
     ArrayList<byte[]> getBuffers() {
@@ -70,7 +74,7 @@ public final class ByteArrayOutputStream extends OutputStream {
     }
     
     private void arrangeNew(int size) {
-        if (size < 1024) {
+        if (size < 1024 || buffers.size() > 5) {
             size = Math.max(size, capacity);
         }
         buffer = new byte[size];

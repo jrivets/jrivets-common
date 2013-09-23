@@ -9,6 +9,16 @@ package org.jrivets.cluster.connection;
  */
 public interface Connection {
 
+    /**
+     * Enables data flow for the connection and assigns the connection listener.
+     * The method can be called once per connection after its creation.
+     * <p>
+     * For client connection the call initiates connecting procedure to server,
+     * in case of connected successfully will send
+     * {@link ConnectedConnectionEvent}
+     * 
+     * @param connectionEventListener
+     */
     void open(Object connectionEventListener);
 
     /**
@@ -29,9 +39,17 @@ public interface Connection {
      * or null packages. The method is tread-safe, so multiple threads can call
      * it simultaneously for different packets.
      * 
-     * @param outboundPacket - packet to be sent.
+     * @param outboundPacket
+     *            - packet to be sent.
      */
     void send(OutboundPacket outboundPacket);
+    
+    /**
+     * Outbound packet factory method.
+     * 
+     * @return
+     */
+    OutboundPacket newOutboundPacket();
 
     void close();
 

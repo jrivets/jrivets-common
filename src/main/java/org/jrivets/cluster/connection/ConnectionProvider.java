@@ -6,5 +6,4 @@ public interface ConnectionProvider {
 
     Connection createClientConnection(Address address);
     
-    Connection createServerConnection(Address address);
 }
