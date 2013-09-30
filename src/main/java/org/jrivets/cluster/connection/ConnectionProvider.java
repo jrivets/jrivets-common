@@ -1,9 +1,9 @@
 package org.jrivets.cluster.connection;
 
-import org.jrivets.cluster.Address;
+import java.net.SocketAddress;
 
 public interface ConnectionProvider {
 
-    Connection createClientConnection(Address address);
+    Connection createClientConnection(SocketAddress address);
     
 }

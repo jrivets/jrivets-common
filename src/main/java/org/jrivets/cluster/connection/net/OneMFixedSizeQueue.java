@@ -7,7 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jrivets.collection.RingBuffer;
 
-final class OneWriterManyReaders<T> {
+final class OneMFixedSizeQueue<T> {
 
     private final RingBuffer<T> buffer;
 
@@ -23,7 +23,7 @@ final class OneWriterManyReaders<T> {
 
     private volatile int interrupts;
 
-    OneWriterManyReaders(int capacity) {
+    OneMFixedSizeQueue(int capacity) {
         buffer = new RingBuffer<T>(capacity);
     }
 
@@ -52,7 +52,7 @@ final class OneWriterManyReaders<T> {
             if (isFull() && writers > 0) {
                 notFull.signal();
             }
-            return buffer.removeFirst();
+            return buffer.remove();
         } finally {
             if (--readers > 0 && !buffer.isEmpty()) {
                 notEmpty.signal();
@@ -98,7 +98,7 @@ final class OneWriterManyReaders<T> {
         }
         lock.lock();
         try {
-            notEmpty.notify();
+            notEmpty.signal();
         } finally {
             lock.unlock();
         }

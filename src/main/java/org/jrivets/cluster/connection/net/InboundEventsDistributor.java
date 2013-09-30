@@ -11,8 +11,8 @@ import org.jrivets.log.Logger;
 import org.jrivets.log.LoggerFactory;
 
 final class InboundEventsDistributor {
-    
-    private final Logger logger = LoggerFactory.getLogger(InboundEventsDistributor.class); 
+
+    private final Logger logger;
 
     private final ExecutorService executor;
 
@@ -26,10 +26,10 @@ final class InboundEventsDistributor {
 
     private final Lock lock = new ReentrantLock();
 
-    private final OneWriterManyReaders<InboundEventHolder> inboundQueue;
+    private final OneMFixedSizeQueue<InboundEventHolder> inboundQueue;
 
-    private int removeWorkerAfterIdleMins;
-    
+    private final int removeWorkerAfterIdleMins;
+
     private final AtomicInteger busy = new AtomicInteger();
 
     private class Worker implements Runnable {
@@ -40,14 +40,13 @@ final class InboundEventsDistributor {
             boolean active = true;
             try {
                 while (active) {
-                    InboundEventHolder holder = inboundQueue.removeLast(removeWorkerAfterIdleMins,
-                            TimeUnit.MINUTES);
+                    InboundEventHolder holder = inboundQueue.removeLast(removeWorkerAfterIdleMins, TimeUnit.MINUTES);
                     active = notifySubsciber(holder) || !exitByLongIdle();
                 }
             } catch (InterruptedException e) {
                 logger.debug("Worker thread is interrupted with message ", e.getMessage());
             } finally {
-                onExit(!active);
+                onExit(active);
             }
         }
 
@@ -84,20 +83,23 @@ final class InboundEventsDistributor {
                 if (ite.getCause() instanceof InterruptedException) {
                     throw (InterruptedException) ite.getCause();
                 }
-                // TODO: print to log, probably error
+                logger.error("Notification exception. holder=", holder, ite.getCause());
+            } catch (NoSuchMethodException nme) {
+                logger.debug("Cannot find method: ", nme.getMessage(), holder);
             } catch (Exception e) {
-                // TODO: print some details about the exception.. probably error
+                logger.error("Exception while notify subscriber: ", e);
             } finally {
                 busy.decrementAndGet();
             }
             return true;
         }
-        
+
         private boolean exitByLongIdle() {
             lock.lock();
             try {
                 if (workersCount() > minWorkers) {
                     --running;
+                    logger.info("Reduce number of workers due to idle state ", InboundEventsDistributor.this);
                     return true;
                 }
                 return false;
@@ -105,35 +107,25 @@ final class InboundEventsDistributor {
                 lock.unlock();
             }
         }
-        
-        private void addWorkerIfNeeded() {
-            if (notEnoughWorkersForQueue()) {
-                lock.lock();
-                try {
-                    if (notEnoughWorkersForQueue()) {
-                        startNewWorker();
-                    }
-                } finally {
-                    lock.unlock();
-                }
-            }
-        }
-        
-        private boolean notEnoughWorkersForQueue() {
-            int workers = workersCount();
-            return inboundQueue.size() > 0 && 
-                    workersCount() < maxWorkers && 
-                    busy.get() == workers; 
-        }
+
     }
 
-    InboundEventsDistributor(ExecutorService executor, int minWorkers, int maxWorkers) {
+    InboundEventsDistributor(ExecutorService executor, String name, int minWorkers, int maxWorkers, int queueSize,
+            int idleMins) {
+        this.logger = LoggerFactory.getLogger(InboundEventsDistributor.class, "(" + name + ") %2$s", null);
         this.executor = executor;
         this.minWorkers = Math.min(1, minWorkers);
         this.maxWorkers = Math.max(this.minWorkers, maxWorkers);
-        this.inboundQueue = new OneWriterManyReaders<InboundEventHolder>(10000); // TODO
-                                                                                  // configure
+        this.inboundQueue = new OneMFixedSizeQueue<InboundEventHolder>(queueSize);
+        this.removeWorkerAfterIdleMins = idleMins;
+        logger.info("Starting with minWorkers=", minWorkers, ", maxWorkers=", maxWorkers, " qSize=", queueSize,
+                ", removeWorkerAfterIdleMins=", removeWorkerAfterIdleMins);
         startWorkers(this.minWorkers);
+    }
+
+    void put(InboundEventHolder holder) throws InterruptedException {
+        inboundQueue.put(holder);
+        addWorkerIfNeeded();
     }
 
     private void startWorkers(int count) {
@@ -142,6 +134,7 @@ final class InboundEventsDistributor {
             for (int i = 0; i < count; ++i) {
                 startNewWorker();
             }
+            logger.info("Starting ", count, " workers ", this);
         } finally {
             lock.unlock();
         }
@@ -161,5 +154,31 @@ final class InboundEventsDistributor {
         } catch (Throwable t) {
             --starting;
         }
+    }
+
+    private void addWorkerIfNeeded() {
+        if (notEnoughWorkersForQueue()) {
+            lock.lock();
+            try {
+                if (notEnoughWorkersForQueue()) {
+                    logger.info("Adding new worker ", InboundEventsDistributor.this);
+                    startNewWorker();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+    private boolean notEnoughWorkersForQueue() {
+        int workers = workersCount();
+        return inboundQueue.size() > 0 && workersCount() < maxWorkers && busy.get() == workers;
+    }
+    
+    @Override
+    public String toString() {
+        return new StringBuilder(128).append("{workers=").append(workersCount()).append("(r=").append(running)
+                .append(" + s=").append(starting).append("), busy=").append(busy).append(", qSize=")
+                .append(inboundQueue.size()).append("}").toString();
     }
 }

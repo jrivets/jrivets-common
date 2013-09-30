@@ -22,34 +22,15 @@ public interface Connection {
     void open(Object connectionEventListener);
 
     /**
-     * Sets events deliver discipline. If the {@code serialDelivery} is
-     * {@code true}, then next event cannot be delivered before handling of
-     * previous one is over. It is set to true by default.
+     * Writes data to channel. Can block invocation thread for undefined time in
+     * case of {@link blocking} parameter is true.
      * 
-     * @param serialDelivery
+     * @param data
+     * @param blocking
+     * @return whether the operation was succeeded and data will be or have been
+     *         actually sent through the channel
      */
-    void setSerial(boolean serialDelivery);
-
-    /**
-     * Sends data to the connection asynchronously.
-     * <p>
-     * Outbound packet is placed to internal connection send buffer. The method
-     * usually returns immediately, but it can block the invocation thread for
-     * some time if the send buffer is full. It never throws, and ignores empty
-     * or null packages. The method is tread-safe, so multiple threads can call
-     * it simultaneously for different packets.
-     * 
-     * @param outboundPacket
-     *            - packet to be sent.
-     */
-    void send(OutboundPacket outboundPacket);
-    
-    /**
-     * Outbound packet factory method.
-     * 
-     * @return
-     */
-    OutboundPacket newOutboundPacket();
+    boolean write(byte[] data, boolean blocking);
 
     void close();
 

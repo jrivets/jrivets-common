@@ -5,12 +5,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Queue;
 
 /**
  * Ring Buffer is a container with fixed capacity and FIFO discipline: elements
  * can be added to the end of the buffer and removed from the head only. The
- * <tt>RingBuffer</tt> implements {@link Collection} interface to be used easily
- * in some iteration routines, but some methods for modification the collection
+ * <tt>RingBuffer</tt> implements {@link Queue} interface to be used easily in
+ * some iteration routines, but some methods for modification the collection
  * like <tt>addAll()</tt>, <tt>removeAll()</tt> etc. are not supported and will
  * throw {@link UnsupportedOperationException} exception.
  * <p>
@@ -19,17 +20,19 @@ import java.util.NoSuchElementException;
  * least one of the threads modifies the list structurally, it <i>must</i> be
  * synchronized externally <strong>except the use case as follows:</strong>
  * <p>
- * If one thread is reader (uses <tt>removeFirst()</tt>, <tt>capacity()</tt> and
- * <tt>size()</tt> methods only), and another one is writer (uses <tt>add()</tt>, <tt>capacity()</tt> and <tt>size()</tt> methods only), the methods can be
- * called without any synchronization. For all other scenarios the buffer is not
- * thread-safe, so methods invocations should be properly guarded in case of
- * multi-threads usage.
+ * If one thread is reader (uses <tt>remove()</tt>, <tt>poll()</tt>,
+ * <tt>element()</tt>, <tt>peek()</tt>, <tt>capacity()</tt> and <tt>size()</tt>
+ * methods only), and another one is writer (uses <tt>add()</tt>,
+ * <tt>offer()</tt> <tt>capacity()</tt> and <tt>size()</tt> methods only), the
+ * methods can be called without any synchronization. For all other scenarios
+ * the buffer is not thread-safe, so methods invocations should be properly
+ * guarded in case of multi-threads usage.
  * 
  * @author Dmitry Spasibenko
  * 
  * @param <T>
  */
-public final class RingBuffer<T> implements Collection<T>, Serializable {
+public final class RingBuffer<T> implements Queue<T>, Serializable {
 
     private static final long serialVersionUID = -8275240829599598029L;
 
@@ -76,6 +79,14 @@ public final class RingBuffer<T> implements Collection<T>, Serializable {
 
     @Override
     public boolean add(T value) {
+        if (!offer(value)) {
+            throw new IllegalStateException("The buffer is full");
+        }
+        return true;
+    }
+
+    @Override
+    public boolean offer(T value) {
         if (size() < values.length - 1) {
             values[tailIdx] = value;
             tailIdx = correctIdx(tailIdx + 1);
@@ -85,18 +96,36 @@ public final class RingBuffer<T> implements Collection<T>, Serializable {
     }
 
     @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException();
+    public T remove() {
+        assertSizeIsNotZero();
+        return removeFirst();
     }
 
-    public T removeFirst() {
+    @Override
+    public T poll() {
+        if (size() == 0) {
+            return null;
+        }
+        return removeFirst();
+    }
+
+    @Override
+    public T element() {
         assertSizeIsNotZero();
+        return values[headIdx];
+    }
 
-        T result = values[headIdx];
-        values[headIdx] = null;
-        headIdx = correctIdx(headIdx + 1);
+    @Override
+    public T peek() {
+        if (size() == 0) {
+            return null;
+        }
+        return values[headIdx];
+    }
 
-        return result;
+    @Override
+    public boolean remove(Object o) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -131,11 +160,6 @@ public final class RingBuffer<T> implements Collection<T>, Serializable {
             Arrays.fill(values, 0, values.length - 1, null);
         }
         headIdx = tailIdx;
-    }
-
-    public T first() {
-        assertSizeIsNotZero();
-        return values[headIdx];
     }
 
     public T last() {
@@ -241,6 +265,13 @@ public final class RingBuffer<T> implements Collection<T>, Serializable {
         return hashCode;
     }
 
+    private T removeFirst() {
+        T result = values[headIdx];
+        values[headIdx] = null;
+        headIdx = correctIdx(headIdx + 1);
+        return result;
+    }
+
     private int correctIdx(int idx) {
         if (idx >= values.length) {
             return idx - values.length;
@@ -300,7 +331,7 @@ public final class RingBuffer<T> implements Collection<T>, Serializable {
     @Override
     public String toString() {
         return new StringBuilder().append("{size=").append(size()).append(", capacity=").append(capacity())
-                .append(", headIdx=").append(headIdx).append(", tailIdx=").append(tailIdx).append(", values=")
-                .append(Arrays.toString(values)).append("}").toString();
+                .append(", headIdx=").append(headIdx).append(", tailIdx=").append(tailIdx).append("}").toString();
     }
+
 }

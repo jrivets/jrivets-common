@@ -84,7 +84,7 @@ public final class HandshakeConnection {
         switch (hsResult.getFirst()) {
         case NEED_MORE:
             if (timerTask != null) timerTask.reschedule();
-            connection.send((OutboundPacket) hsResult.getSecond());
+            //TODO: old one - connection.send((OutboundPacket) hsResult.getSecond());
             break;
         case FAIL:
             closeWithReason(CloseReason.HS_FAIL);
@@ -94,7 +94,7 @@ public final class HandshakeConnection {
             if (setState(State.CONNECTING, State.CONNECTED)) {
                 endpoint = (ConnectionEndpoint) hsResult.getSecond();
                 hsChecker.onConnected(this);
-                connection.setSerial(hsResult.getFirst() == CheckResult.OK_SERIAL); // last thing what we do here
+                //TODO: refactor: connection.setSerial(hsResult.getFirst() == CheckResult.OK_SERIAL); // last thing what we do here
                 break;
             } // yes, we go ahead here
         default: 

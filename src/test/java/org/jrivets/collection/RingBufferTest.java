@@ -27,12 +27,19 @@ public class RingBufferTest {
         RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(-10);
     }
 
-    @Test
+    @Test(expectedExceptions=IllegalStateException.class)
     public void addTest() {
         RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(1);
         assertTrue(ringBuffer.add(1));
-        assertFalse(ringBuffer.add(2));
-        assertFalse(ringBuffer.add(3));
+        ringBuffer.add(2);
+    }
+    
+    @Test
+    public void offerTest() {
+        RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(1);
+        assertTrue(ringBuffer.offer(1));
+        assertFalse(ringBuffer.offer(2));
+        assertFalse(ringBuffer.offer(3));
         assertEquals(1, ringBuffer.size());
     }
 
@@ -43,7 +50,19 @@ public class RingBufferTest {
         assertTrue(ringBuffer.add(2));
         assertEquals(2, ringBuffer.size());
         assertTrue(ringBuffer.add(3));
-        assertFalse(ringBuffer.add(4));
+        assertFalse(ringBuffer.offer(4));
+        assertEquals(3, ringBuffer.size());
+        assertEquals(3, ringBuffer.capacity());
+    }
+    
+    @Test
+    public void offerTest2() {
+        RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(3);
+        assertTrue(ringBuffer.offer(1));
+        assertTrue(ringBuffer.offer(2));
+        assertEquals(2, ringBuffer.size());
+        assertTrue(ringBuffer.offer(3));
+        assertFalse(ringBuffer.offer(4));
         assertEquals(3, ringBuffer.size());
         assertEquals(3, ringBuffer.capacity());
     }
@@ -55,19 +74,19 @@ public class RingBufferTest {
         assertTrue(ringBuffer.add(2));
         for (int i = 3; i < 10; i++) {
             assertEquals(2, ringBuffer.size());
-            assertEquals(new Integer(i - 2), ringBuffer.removeFirst());
+            assertEquals(new Integer(i - 2), ringBuffer.remove());
             assertEquals(1, ringBuffer.size());
-            assertEquals(new Integer(i - 1), ringBuffer.first());
+            assertEquals(new Integer(i - 1), ringBuffer.element());
             assertEquals(new Integer(i - 1), ringBuffer.last());
             ringBuffer.add(i);
-            assertEquals(new Integer(i - 1), ringBuffer.first());
+            assertEquals(new Integer(i - 1), ringBuffer.element());
             assertEquals(new Integer(i), ringBuffer.last());
         }
     }
 
     @Test(expectedExceptions = NoSuchElementException.class)
     public void firstTest() {
-        new RingBuffer<Integer>(3).first();
+        new RingBuffer<Integer>(3).element();
     }
 
     @Test
@@ -75,8 +94,8 @@ public class RingBufferTest {
         RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(2);
         ringBuffer.add(1);
         ringBuffer.add(2);
-        ringBuffer.add(3);
-        assertTrue(ringBuffer.first() == 1);
+        ringBuffer.offer(3);
+        assertTrue(ringBuffer.element() == 1);
         assertTrue(ringBuffer.size() == 2);
     }
 
@@ -88,28 +107,63 @@ public class RingBufferTest {
     @Test
     public void lastTest2() {
         RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(2);
-        ringBuffer.add(1);
+        ringBuffer.offer(1);
         ringBuffer.add(2);
-        ringBuffer.add(3);
+        ringBuffer.offer(3);
         assertTrue(ringBuffer.last() == 2);
     }
 
     @Test(expectedExceptions = NoSuchElementException.class)
-    public void removeFirst() {
-        new RingBuffer<Integer>(3).removeFirst();
+    public void remove() {
+        new RingBuffer<Integer>(3).remove();
     }
 
     @Test
-    public void removeFirst2() {
+    public void remove2() {
         RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(2);
         ringBuffer.add(1);
         ringBuffer.add(2);
-        ringBuffer.add(3);
-        ringBuffer.removeFirst();
+        ringBuffer.offer(3);
+        ringBuffer.remove();
         assertTrue(ringBuffer.last() == 2);
-        assertTrue(ringBuffer.first() == 2);
+        assertTrue(ringBuffer.element() == 2);
         assertTrue(ringBuffer.size() == 1);
     }
+    
+    @Test
+    public void peek() {
+        assertNull(new RingBuffer<Integer>(3).peek());
+    }
+    
+    @Test
+    public void peek2() {
+        RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(2);
+        ringBuffer.add(1);
+        ringBuffer.add(2);
+        ringBuffer.offer(3);
+        assertEquals(ringBuffer.peek(), new Integer(1));
+        assertEquals(ringBuffer.last(), new Integer(2));
+        assertEquals(ringBuffer.element(), new Integer(1));
+        assertEquals(ringBuffer.size(), 2);
+    }
+    
+    @Test
+    public void pool() {
+        assertNull(new RingBuffer<Integer>(3).poll());
+    }
+    
+    @Test
+    public void poll2() {
+        RingBuffer<Integer> ringBuffer = new RingBuffer<Integer>(2);
+        ringBuffer.add(1);
+        ringBuffer.add(2);
+        ringBuffer.offer(3);
+        assertEquals(ringBuffer.poll(), new Integer(1));
+        assertEquals(ringBuffer.last(), new Integer(2));
+        assertEquals(ringBuffer.element(), new Integer(2));
+        assertEquals(ringBuffer.size(), 1);
+    }
+
 
     @Test
     public void equalsTest() {
@@ -163,10 +217,10 @@ public class RingBufferTest {
         ringBuffer.add(1);
         ringBuffer.add(2);
         ringBuffer.add(3);
-        ringBuffer.removeFirst();
+        ringBuffer.remove();
         
         assertTrue(ringBuffer.size() == 2);
-        assertEquals(new Integer(2), ringBuffer.first());
+        assertEquals(new Integer(2), ringBuffer.element());
         assertEquals(new Integer(3), ringBuffer.last());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -178,7 +232,7 @@ public class RingBufferTest {
 
         RingBuffer<Integer> readBuffer = (RingBuffer<Integer>) ois.readObject();
         assertTrue(readBuffer.size() == 2);
-        assertEquals(new Integer(2), readBuffer.first());
+        assertEquals(new Integer(2), readBuffer.element());
         assertEquals(new Integer(3), readBuffer.last());
     }
 }

@@ -18,7 +18,7 @@ import org.jrivets.cluster.connection.OutboundPacket;
  * should be switched to sending mode as soon as the sender is done with adding
  * data. No new data is allowed in sending mode. Another thread can actually
  * send data through a connection using ByteBuffer, which is available in
- * sending mode only. All packet data is send followed by 4-bytes lenght of the
+ * sending mode only. All packet data is send followed by 4-bytes length of the
  * packet, which always goes first.
  * 
  * @author Dmitry Spasibenko
@@ -48,7 +48,8 @@ final class OutboundStreamPacketizer implements OutboundPacket {
         chunks.add(chunk);
     }
 
-    ByteArrayOutputStream getOutputStream() {
+    @Override
+    public ByteArrayOutputStream getOutputStream() {
         checkNotSending();
         return chunks.get(0);
     }

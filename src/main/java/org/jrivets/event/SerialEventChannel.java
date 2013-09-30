@@ -175,7 +175,7 @@ public final class SerialEventChannel implements EventChannel {
                 return null;
             }
             boolean needNotifyPublishThread = events.size() == events.capacity();
-            Object result = events.removeFirst();
+            Object result = events.remove();
             if (needNotifyPublishThread) {
                 logger.debug("Notify publish threads about getting events from full queue.");
                 getCondition().signalAll();

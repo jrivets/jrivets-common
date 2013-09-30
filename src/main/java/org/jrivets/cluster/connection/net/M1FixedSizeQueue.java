@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jrivets.collection.RingBuffer;
 
-final class ManyWritersOneReader<T> {
+final class M1FixedSizeQueue<T> {
     
     private final RingBuffer<T> buffer;
     
@@ -14,9 +14,11 @@ final class ManyWritersOneReader<T> {
     
     private final Condition notFull = lock.newCondition();
     
-    private volatile int blockedWriters;
+    private volatile int rVersion;
+    
+    private volatile int wVersion;
 
-    ManyWritersOneReader(int capacity) {
+    M1FixedSizeQueue(int capacity) {
         this.buffer = new RingBuffer<T>(capacity);
     }
     
@@ -24,26 +26,39 @@ final class ManyWritersOneReader<T> {
      * Retrieves and removes the head of this queue, or null if the queue is empty.
      */
     T poll() {
-        boolean isFull = isFull();
-        T result = buffer.size() == 0 ? null : buffer.removeFirst(); 
-        if (isFull && blockedWriters > 0) {
+        T result = buffer.poll(); 
+        if (rVersion != wVersion) {
             notifyNotFull();
         }
         return result;
     }
     
-    void put(T element) throws InterruptedException {
+    void put(T element, Runnable kickReader) throws InterruptedException {
         lock.lock();
         try {
-            blockedWriters++;
             while (isFull()) {
+                wVersion++;
+                kickReader.run();
                 notFull.await();
             }
-            buffer.add(element);
+            buffer.offer(element);
+            kickReader.run();            
         } finally {
-            --blockedWriters;
             lock.unlock();
         }
+    }
+    
+    boolean offer(T element) {
+        lock.lock();
+        try {
+            return buffer.offer(element);
+        } finally {
+            lock.unlock();
+        }
+    }
+     
+    int size() {
+        return buffer.size();
     }
     
     private boolean isFull() {
@@ -53,9 +68,15 @@ final class ManyWritersOneReader<T> {
     private void notifyNotFull() {
         lock.lock();
         try {
-            notFull.signal();
+            rVersion = wVersion;
+            notFull.signalAll();
         } finally {
             lock.unlock();
         }
+    }
+    
+    @Override
+    public String toString() {
+        return "{size=" + buffer.size() + ", capacity=" + buffer.capacity() + "}";
     }
 }

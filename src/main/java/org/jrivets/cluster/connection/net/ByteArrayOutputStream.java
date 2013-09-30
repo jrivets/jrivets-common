@@ -27,7 +27,7 @@ final class ByteArrayOutputStream extends OutputStream {
     
     @Override
     public void write(int b) throws IOException {
-        if (position == buffer.length - 1) {
+        if (position == buffer.length) {
             arrangeNew(1);
         }
         buffer[position++] = (byte) b;

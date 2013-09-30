@@ -27,4 +27,10 @@ final class InboundEventHolder {
         }
         return null;
     }
+    
+    @Override
+    public String toString() {
+        return "{subscriber=" + subscriber + ", event=" + event + "}";
+    }
+    
 }

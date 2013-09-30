@@ -1,11 +1,17 @@
 package org.jrivets.cluster.connection;
 
+import java.nio.ByteBuffer;
+
 public final class ReadFromConnectionEvent extends ConnectionEvent {
     
-    private byte[] data; 
+    private final ByteBuffer buffer; 
 
-    ReadFromConnectionEvent(Connection connection, byte[] data) {
+    public ReadFromConnectionEvent(Connection connection, ByteBuffer buffer) {
         super(connection);
-        this.data = data;
+        this.buffer = buffer;
+    }
+    
+    public ByteBuffer getBuffer() {
+        return buffer;
     }
 }

@@ -17,8 +17,8 @@ final class InputStreamPacketizer {
     private int size;
     
     InputStreamPacketizer(int inputBufferSize) {
-        inputBuffer = new byte[inputBufferSize];
-        inputByteBuffer = ByteBuffer.wrap(inputBuffer);
+        this.inputByteBuffer = ByteBuffer.allocate(inputBufferSize);
+        this.inputBuffer = inputByteBuffer.array();
     }
     
     ByteBuffer getInputByteBuffer() {
@@ -55,7 +55,7 @@ final class InputStreamPacketizer {
     
     private void parseSize() {
         while (totalRead < 4 && readPos < inputByteBuffer.position()) {
-            size = (size << 8) | inputBuffer[readPos++];
+            size = (size << 8) | (inputBuffer[readPos++]&0xff);
             totalRead++;
         }
     }
