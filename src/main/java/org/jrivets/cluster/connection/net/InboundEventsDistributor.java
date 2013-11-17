@@ -26,7 +26,7 @@ final class InboundEventsDistributor {
 
     private final Lock lock = new ReentrantLock();
 
-    private final OneMFixedSizeQueue<InboundEventHolder> inboundQueue;
+    private final OneMFixedSizeQueue<SubscriberNotification> inboundQueue;
 
     private final int removeWorkerAfterIdleMins;
 
@@ -40,7 +40,7 @@ final class InboundEventsDistributor {
             boolean active = true;
             try {
                 while (active) {
-                    InboundEventHolder holder = inboundQueue.removeLast(removeWorkerAfterIdleMins, TimeUnit.MINUTES);
+                    SubscriberNotification holder = inboundQueue.removeLast(removeWorkerAfterIdleMins, TimeUnit.MINUTES);
                     active = notifySubsciber(holder) || !exitByLongIdle();
                 }
             } catch (InterruptedException e) {
@@ -71,7 +71,7 @@ final class InboundEventsDistributor {
             }
         }
 
-        private boolean notifySubsciber(InboundEventHolder holder) throws InterruptedException {
+        private boolean notifySubsciber(SubscriberNotification holder) throws InterruptedException {
             if (holder == null) {
                 return false;
             }
@@ -116,14 +116,14 @@ final class InboundEventsDistributor {
         this.executor = executor;
         this.minWorkers = Math.min(1, minWorkers);
         this.maxWorkers = Math.max(this.minWorkers, maxWorkers);
-        this.inboundQueue = new OneMFixedSizeQueue<InboundEventHolder>(queueSize);
+        this.inboundQueue = new OneMFixedSizeQueue<SubscriberNotification>(queueSize);
         this.removeWorkerAfterIdleMins = idleMins;
         logger.info("Starting with minWorkers=", minWorkers, ", maxWorkers=", maxWorkers, " qSize=", queueSize,
                 ", removeWorkerAfterIdleMins=", removeWorkerAfterIdleMins);
         startWorkers(this.minWorkers);
     }
 
-    void put(InboundEventHolder holder) throws InterruptedException {
+    void put(SubscriberNotification holder) throws InterruptedException {
         inboundQueue.put(holder);
         addWorkerIfNeeded();
     }

@@ -4,13 +4,13 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 /**
- * Many writers, one reader unbounded queue. 
+ * One Writer One Reader unbounded queue. 
  * 
  *  @author Dmitry Spasibenko 
  *
  * @param <E>
  */
-final class M1UnboundedQueue<E>  {
+final class OneOneUnboundedQueue<E>  {
     
     private final LinkedList<E[]> chunks = new LinkedList<E[]>();
     
@@ -24,11 +24,11 @@ final class M1UnboundedQueue<E>  {
     
     private int tail;
 
-    M1UnboundedQueue() {
+    OneOneUnboundedQueue() {
         this(1024);
     }
     
-    M1UnboundedQueue(int chunkSize) {
+    OneOneUnboundedQueue(int chunkSize) {
         this.chunkSize = chunkSize;
         newTailChunk();
         this.headChunk = this.tailChunk;

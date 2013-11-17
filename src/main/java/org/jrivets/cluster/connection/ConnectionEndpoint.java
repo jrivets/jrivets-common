@@ -1,7 +1,9 @@
 package org.jrivets.cluster.connection;
 
+import org.jrivets.io.channels.ReadFromChannelEvent;
+
 public interface ConnectionEndpoint {
 
-    void onRead(ReadFromConnectionEvent readEvent);
+    void onRead(ReadFromChannelEvent readEvent);
     
 }

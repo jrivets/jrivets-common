@@ -6,13 +6,13 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jrivets.cluster.TimerTask;
-import org.jrivets.cluster.connection.ConnectedConnectionEvent;
 import org.jrivets.cluster.connection.Connection;
 import org.jrivets.cluster.connection.ConnectionEndpoint;
 import org.jrivets.cluster.connection.OutboundPacket;
-import org.jrivets.cluster.connection.ReadFromConnectionEvent;
 import org.jrivets.cluster.handshake.HandshakeChecker.CheckResult;
 import org.jrivets.event.OnEvent;
+import org.jrivets.io.channels.ChannelConnectEvent;
+import org.jrivets.io.channels.ReadFromChannelEvent;
 import org.jrivets.util.container.Pair;
 
 public final class HandshakeConnection { 
@@ -55,7 +55,7 @@ public final class HandshakeConnection {
      * @param connectedEvent
      */
     @OnEvent
-    void onConnect(ConnectedConnectionEvent connectedEvent) {
+    void onConnect(ChannelConnectEvent connectedEvent) {
         if (setStateConnecting()) {
             // we have got connected, so allow client to initiate communication.
             onHandshakePacket(null);
@@ -67,7 +67,7 @@ public final class HandshakeConnection {
     }
         
     @OnEvent 
-    void onRead(ReadFromConnectionEvent readEvent) {
+    void onRead(ReadFromChannelEvent readEvent) {
         if (state == State.CONNECTED) {
             endpoint.onRead(readEvent);
             return;
@@ -79,7 +79,7 @@ public final class HandshakeConnection {
         onHandshakePacket(readEvent);
     }
     
-    private void onHandshakePacket(ReadFromConnectionEvent readEvent) {
+    private void onHandshakePacket(ReadFromChannelEvent readEvent) {
         Pair<CheckResult, Object> hsResult = hsChecker.onHandshakePacket(readEvent);
         switch (hsResult.getFirst()) {
         case NEED_MORE:

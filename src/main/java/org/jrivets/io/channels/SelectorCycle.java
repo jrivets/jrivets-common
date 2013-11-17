@@ -1,4 +1,4 @@
-package org.jrivets.cluster.connection.net;
+package org.jrivets.io.channels;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -18,18 +18,21 @@ abstract class SelectorCycle {
 
     private final Thread cycleThread;
 
+    private final Runnable mainCycle = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                mainCycle();
+            } catch (IOException e) {
+                logger.error("Finalizing main cycle with the exception ", e);
+            }
+        }
+    };
+
     protected SelectorCycle(Logger logger) throws IOException {
         this.logger = logger;
         this.selector = Selector.open();
-        this.cycleThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mainCycle();
-                } catch (IOException e) {
-                }
-            }
-        });
+        this.cycleThread = new Thread(mainCycle);
     }
 
     void onCommand(Runnable command) {
@@ -41,12 +44,28 @@ abstract class SelectorCycle {
         cycleThread.start();
     }
 
-    void stop() throws InterruptedException {
-        cycleThread.interrupt();
-        cycleThread.join();
+    void stop() {
+        try {
+            cycleThread.interrupt();
+            cycleThread.join();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            logger.warn("Cannot wait cycle finalization, interrupted.");
+        }
     }
 
     protected abstract void onSelect(SelectionKey sKey);
+
+    protected void miscCycle() {
+
+    }
+
+    /**
+     * The implementation should never throw!
+     */
+    protected void finalized() {
+
+    }
 
     private void mainCycle() throws IOException {
         logger.info("Starting main cycle");
@@ -54,9 +73,11 @@ abstract class SelectorCycle {
             while (!Thread.interrupted()) {
                 selectCycle();
                 commandCycle();
+                miscCycle();
             }
         } finally {
-            logger.info("Ending main cycle");
+            finalized();
+            logger.info("Finishing main cycle");
             selector.close();
         }
     }

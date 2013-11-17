@@ -1,5 +1,7 @@
 package org.jrivets.cluster.connection;
 
+import org.jrivets.io.channels.ChannelConnectEvent;
+
 /**
  * Represents a connection between Cluster Node and a Peer (remote Node in
  * relation to the connection owner)
@@ -15,7 +17,7 @@ public interface Connection {
      * <p>
      * For client connection the call initiates connecting procedure to server,
      * in case of connected successfully will send
-     * {@link ConnectedConnectionEvent}
+     * {@link ChannelConnectEvent}
      * 
      * @param connectionEventListener
      */

@@ -2,13 +2,13 @@ package org.jrivets.cluster.connection.net;
 
 import org.jrivets.event.Subscriber;
 
-final class InboundEventHolder {
+public final class SubscriberNotification {
 
     private final Subscriber subscriber;
     
     private final Object event;
     
-    InboundEventHolder(Subscriber subscriber, Object event) {
+    SubscriberNotification(Subscriber subscriber, Object event) {
         this.subscriber = subscriber;
         this.event = event;
     }

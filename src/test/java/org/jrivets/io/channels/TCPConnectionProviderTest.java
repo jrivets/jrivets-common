@@ -1,4 +1,4 @@
-package org.jrivets.cluster.connection.net;
+package org.jrivets.io.channels;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -7,11 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.jrivets.cluster.connection.AcceptedConnectionEvent;
-import org.jrivets.cluster.connection.ConnectedConnectionEvent;
 import org.jrivets.cluster.connection.Connection;
-import org.jrivets.cluster.connection.ReadFromConnectionEvent;
 import org.jrivets.event.OnEvent;
+import org.jrivets.io.channels.TCPChannel;
+import org.jrivets.io.channels.TCPChannelProivider;
 
 public class TCPConnectionProviderTest {
 
@@ -25,8 +24,9 @@ public class TCPConnectionProviderTest {
 
     class AcceptedListener {
         @OnEvent
-        void onAccepted(AcceptedConnectionEvent ace) {
-            ace.getConnection().open(listener);
+        void onAccepted(ChannelAcceptEvent ace) {
+            ace.getChannel().open(listener);
+            ace.getChannel().setChannelReader(new DirectChannelReader());
             acceptCount.incrementAndGet();
         }
     }
@@ -39,24 +39,26 @@ public class TCPConnectionProviderTest {
         private AtomicLong readCount = new AtomicLong();
 
         @OnEvent
-        void onConnected(ConnectedConnectionEvent cce) throws IOException, InterruptedException {
+        void onConnected(ChannelConnectEvent cce) throws IOException, InterruptedException {
             while (acceptCount.get() < 1) {
                 Thread.yield();
             }
-            TCPConnection2 connection = (TCPConnection2) cce.getConnection();
+            TCPChannel connection = (TCPChannel) cce.getChannel();
+            CachedChannelWriter w = new CachedChannelWriter(connection, 500);
+            connection.setChannelWriter(w);
             Thread.sleep(500);
             long start = System.currentTimeMillis();
             long count = 4000000000L/b.length;
             long totalWrite = 0;
             for (int i = 0; i < count; i++) {
-                connection.write(b, true);
+                w.write(b, true);
                 totalWrite += b.length;
             }
             while (readCount.get() < totalWrite) 
                 Thread.yield();
             long length = System.currentTimeMillis() - start;
             System.out.println(readCount.get() + " btes receive took " + length + "ms " + (readCount.get()/length)*1000L + " per second.");
-            connection.closeConnection();
+            connection.close();
             
 //            long stop = System.currentTimeMillis() + 2000L;
 //            while (stop > System.currentTimeMillis()) {
@@ -69,21 +71,21 @@ public class TCPConnectionProviderTest {
         }
 
         @OnEvent
-        void onRead(ReadFromConnectionEvent rfce) throws IOException {
+        void onRead(ReadFromChannelEvent rfce) throws IOException {
             readCount.addAndGet(rfce.getBuffer().limit());
         }
 
     }
 
     public void connection2() throws InterruptedException, IOException {
-        ExecutorService executor = Executors.newFixedThreadPool(20);
-        InboundEventsDistributor distributor = new InboundEventsDistributor(executor, "", 1, 10, 100, 1);
-        TCPConnectionProivider2 prov = new TCPConnectionProivider2(17018, distributor, new AcceptedListener());
-        prov = new TCPConnectionProivider2(-1, distributor, null);
-        TCPConnection2 con2 = prov.createClientConnection(new InetSocketAddress(17018));
+        TCPChannelProivider prov1 = new TCPChannelProivider(17018, new AcceptedListener());
+        TCPChannelProivider prov = new TCPChannelProivider(-1, null);
+        TCPChannel con2 = prov.createClientConnection(new InetSocketAddress(17018));
         con2.open(listener);
-        while(true)
+        while(con2.getState() != TCPChannel.State.CLOSED)
             Thread.yield();
+        prov.stop();
+        prov1.stop();
     }
     
     public static void main(String[] args) throws Exception {

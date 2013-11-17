@@ -1,4 +1,4 @@
-package org.jrivets.cluster.connection.net;
+package org.jrivets.io.channels;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -6,7 +6,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jrivets.collection.RingBuffer;
 
-final class M1FixedSizeQueue<T> {
+/**
+ * Many Writers One Reader fixed size blocked queue
+ * 
+ * @author Dmitry Spasibenko 
+ *
+ * @param <T>
+ */
+final class MOFixedSizeQueue<T> {
     
     private final RingBuffer<T> buffer;
     
@@ -18,7 +25,7 @@ final class M1FixedSizeQueue<T> {
     
     private volatile int wVersion;
 
-    M1FixedSizeQueue(int capacity) {
+    MOFixedSizeQueue(int capacity) {
         this.buffer = new RingBuffer<T>(capacity);
     }
     

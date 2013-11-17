@@ -28,7 +28,11 @@ public final class Pair<A, B> {
 
     @Override
     public boolean equals(Object obj) {
-        return Objects.equal(this, obj);
+        if (obj instanceof Pair) {
+            Pair<?, ?> op = (Pair<?, ?>) obj;
+            return Objects.equal(first, op.first) && Objects.equal(second, op.second);
+        }
+        return false;
     }
 
     @Override
