@@ -24,7 +24,6 @@ public final class Subscriber {
     public Object notifySubscriber(Object e) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException  {
         Method m = typeDetails.getMethod(e);
         if (m != null) {
-            m.setAccessible(true);
             return m.invoke(subscriber, e);
         }
         throw new NoSuchMethodException("There is no annotated method in " + subscriber.getClass() + " class to handle "

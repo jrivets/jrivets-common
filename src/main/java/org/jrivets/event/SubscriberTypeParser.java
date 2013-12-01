@@ -72,6 +72,7 @@ final class SubscriberTypeParser {
                                 + " and " + anotherMethod.getName() + " both have same type parameter.");
                     }
                     logger.info("Accepting ", m.getName(), " with param ", params[0]);
+                    m.setAccessible(true);
                     eventsMap.put(params[0], m);
                 }
             }
