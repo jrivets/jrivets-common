@@ -32,4 +32,8 @@ final class FileSystemJournal implements Journal {
         policy.close();
     }
 
+    @Override
+    public String toString() {
+        return policy.toString();
+    }
 }

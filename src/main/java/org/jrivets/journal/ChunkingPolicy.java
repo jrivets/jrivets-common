@@ -28,6 +28,7 @@ final class ChunkingPolicy extends AbstractChunkingPolicy {
     ChunkingPolicy(long maxCapacity, long maxChunkSize, String folderName, String prefixName, boolean neverEof, boolean cleanAfterOpen) throws IOException {
         super(LoggerFactory.getLogger(ChunkingPolicy.class, "(" + prefixName + ") %2$s", null), maxCapacity, maxChunkSize, folderName, prefixName, neverEof);
         init(cleanAfterOpen);
+        logger.info("New ChunkingPolicy: ", this);
     }
 
     private void init(boolean cleanAfterOpen) throws IOException {
@@ -75,6 +76,7 @@ final class ChunkingPolicy extends AbstractChunkingPolicy {
         File file = new File(folderName, prefixName + nextChunkId);
         long total = getTotalCapacity();
         long capacity = Math.min(maxCapacity - total, maxChunkSize);
+        logger.debug("newChunk(): total=", total, ", capacity=", capacity);
         if (capacity <= 0) {
             return false;
         }
@@ -84,13 +86,16 @@ final class ChunkingPolicy extends AbstractChunkingPolicy {
         outputChunk = new Chunk(nextChunkId, capacity, file, false);
         chunks.add(outputChunk);
         nextChunkId = getNextChunkId(nextChunkId);
+        logger.debug("newChunk(): New chunk is creaged ", outputChunk, ", nextChunkId=", nextChunkId);
         return true;
     }
     
     private void cleanUpChunks() {
+        logger.debug("cleanUpChunks(): ", chunks.size(), " chunks before.");
         while (chunks.get(0) != markedChunk && chunks.get(0) != inputChunk) {
             chunks.get(0).delete();
             chunks.remove(0);
         }
+        logger.debug("cleanUpChunks(): ", chunks.size(), " chunks after.");
     }
 }

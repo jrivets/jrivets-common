@@ -88,4 +88,10 @@ final class JournalInfoWriter {
     private Pair<Integer, Long> read() {
         return new Pair<Integer, Long>(buffer.getInt(), buffer.getLong());
     }
+    
+    @Override
+    public String toString() {
+        return "{journalInfo=" + journalInfo + "}";
+    }
+    
 }
