@@ -103,6 +103,11 @@ public class RingBufferTest {
     public void lastTest() {
         new RingBuffer<Integer>(3).last();
     }
+    
+    @Test
+    public void peekLastTest() {
+        assertNull(new RingBuffer<Integer>(3).peekLast());
+    }
 
     @Test
     public void lastTest2() {
@@ -111,6 +116,7 @@ public class RingBufferTest {
         ringBuffer.add(2);
         ringBuffer.offer(3);
         assertTrue(ringBuffer.last() == 2);
+        assertTrue(ringBuffer.peekLast() == 2);
     }
 
     @Test(expectedExceptions = NoSuchElementException.class)

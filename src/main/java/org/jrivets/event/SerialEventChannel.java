@@ -44,7 +44,7 @@ import org.jrivets.log.LoggerFactory;
  * @author Dmitry Spasibenko
  * 
  */
-public final class SerialEventChannel implements EventChannel {
+public class SerialEventChannel implements EventChannel {
 
     private final Logger logger;
 
@@ -65,7 +65,7 @@ public final class SerialEventChannel implements EventChannel {
     enum State {
         WAITING, PROCESSING, PROCESSING_WAITING;
     }
-
+    
     public SerialEventChannel(String name) {
         this(name, 100);
     }

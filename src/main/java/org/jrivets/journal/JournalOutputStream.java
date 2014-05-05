@@ -3,6 +3,8 @@ package org.jrivets.journal;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.jrivets.util.CheckUtils;
+
 /**
  * Not multi-threaded!
  * close - will not take effect
@@ -33,11 +35,8 @@ final class JournalOutputStream extends OutputStream {
      */
     @Override
     public void write(byte b[], int off, int len) throws IOException {
-        if (b == null) {
-            throw new NullPointerException();
-        } else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
-            throw new IndexOutOfBoundsException();
-        } else if (len == 0) {
+        CheckUtils.arrayBounds(b.length, off, len);  
+        if (len == 0) {
             return;
         }
 

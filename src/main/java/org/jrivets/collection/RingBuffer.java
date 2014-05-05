@@ -38,9 +38,9 @@ public final class RingBuffer<T> implements Queue<T>, Serializable {
 
     private transient T[] values;
 
-    private transient int headIdx = 0;
+    private transient int headIdx;
 
-    private transient int tailIdx = 0;
+    private transient int tailIdx;
 
     private class BufferIterator implements Iterator<T> {
 
@@ -164,6 +164,13 @@ public final class RingBuffer<T> implements Queue<T>, Serializable {
 
     public T last() {
         assertSizeIsNotZero();
+        return values[correctIdx(tailIdx - 1)];
+    }
+    
+    public T peekLast() {
+        if (size() == 0) {
+            return null;
+        }
         return values[correctIdx(tailIdx - 1)];
     }
 

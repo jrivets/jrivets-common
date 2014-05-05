@@ -3,6 +3,8 @@ package org.jrivets.journal;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.jrivets.util.CheckUtils;
+
 /**
  * close - will not take effect
  * 
@@ -31,11 +33,8 @@ final class JournalInputStream extends InputStream {
 
     @Override
     public int read(byte b[], int off, int len) throws IOException {
-        if (b == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException();
-        } else if (len == 0) {
+        CheckUtils.arrayBounds(b.length, off, len);    
+        if (len == 0) {
             return 0;
         }
         
