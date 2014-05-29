@@ -161,7 +161,7 @@ public class SerialEventChannel implements EventChannel {
         logger.trace("Notify listeners");
         for (Object e = getEvent(); e != null; e = getEvent()) {
             logger.debug("Notify listeners about the event: ", e);
-            for (Subscriber subscriber : subscribersRegistry.getSubscribers()) {
+            for (Subscriber subscriber: subscribersRegistry.getSubscribers()) {
                 Exception result = subscriber.notifySubscriberSilently(e);
                 if (result != null) {
                     logger.debug("Got the exception while notifying subscriber ", result);

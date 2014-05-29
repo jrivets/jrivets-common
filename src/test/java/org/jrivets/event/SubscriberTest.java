@@ -76,6 +76,6 @@ public class SubscriberTest {
     
     @Test
     public void notifyNoMethodSilentlyTest() throws Exception {
-        assertEquals(subscriber.notifySubscriberSilently(new Boolean(false)).getClass(), NoSuchMethodException.class);
+        assertNull(subscriber.notifySubscriberSilently(new Boolean(false)));
     }
 }

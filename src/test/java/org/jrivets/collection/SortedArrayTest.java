@@ -137,6 +137,15 @@ public class SortedArrayTest {
     }
     
     @Test
+    public void removeByIndex2() {
+        SortedArray<Integer> sa = new SortedArray<Integer>();
+        sa.add(1);
+        sa.add(2);
+        sa.add(3);
+        assertEquals(new Integer(2), sa.removeByIndex(1));
+    }
+    
+    @Test
     public void removeByIndexNull() {
         SortedArray<Integer> sa = new SortedArray<Integer>(descComparator, 2);
         sa.add(1);
@@ -147,7 +156,7 @@ public class SortedArrayTest {
     }
 
     @Test(expectedExceptions = IndexOutOfBoundsException.class)
-    public void removeByIndex2() {
+    public void removeByIndex3() {
         SortedArray<Integer> sa = new SortedArray<Integer>();
         sa.add(1);
         assertTrue(sa.removeByIndex(1) == 1);
@@ -274,5 +283,28 @@ public class SortedArrayTest {
         sa.add(2);
         sa.add(-3);
         assertTrue(sa.toString().contains("{size=3, capacity=10, elements=[-3, 1, 2"));
+    }
+    
+    @Test
+    public void removeBefore() {
+        SortedArray<Integer> sa = new SortedArray<Integer>();
+        sa.add(1);
+        sa.add(2);
+        sa.add(-3);
+        sa.removeBefore(1);
+        assertEquals(sa.size(), 2);
+        assertEquals(sa.get(0), new Integer(1));
+        assertEquals(sa.get(1), new Integer(2));
+    }
+    
+    @Test
+    public void removeBefore2() {
+        SortedArray<Integer> sa = new SortedArray<Integer>();
+        sa.add(1);
+        sa.add(2);
+        sa.removeBefore(0);
+        assertEquals(sa.size(), 2);
+        sa.removeBefore(100);
+        assertEquals(sa.size(), 0);
     }
 }

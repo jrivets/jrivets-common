@@ -9,6 +9,8 @@ public final class Subscriber {
     private final Object subscriber;
 
     private final SubscriberTypeDetails typeDetails;
+    
+    private static final Object NO_SUCH_METHOD = new Object();
 
     Subscriber(Object subscriber, SubscriberTypeDetails typeDetails) {
         this.subscriber = subscriber;
@@ -22,23 +24,31 @@ public final class Subscriber {
     }
 
     public Object notifySubscriber(Object e) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException  {
-        Method m = typeDetails.getMethod(e);
-        if (m != null) {
-            return m.invoke(subscriber, e);
-        }
-        throw new NoSuchMethodException("There is no annotated method in " + subscriber.getClass() + " class to handle "
+        Object result = notifySubscriberIfMethodExists(e);
+        if (result == NO_SUCH_METHOD) {
+            throw new NoSuchMethodException("There is no annotated method in " + subscriber.getClass() + " class to handle "
                 + (e == null ? null : e.getClass()) + " types of events");
+        }
+        return result;
     }
 
     public Exception notifySubscriberSilently(Object e) {
         try {
-            notifySubscriber(e);
+            notifySubscriberIfMethodExists(e);
             return null;
         } catch (Exception ex) {
             return ex;
         }
     }
 
+    Object notifySubscriberIfMethodExists(Object e) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        Method m = typeDetails.getMethod(e);
+        if (m != null) {
+            return m.invoke(subscriber, e);
+        }
+        return NO_SUCH_METHOD;
+    }
+    
     Set<Class<?>> getAcceptedEventsSet() {
         return typeDetails.getEventsMap().keySet();
     }

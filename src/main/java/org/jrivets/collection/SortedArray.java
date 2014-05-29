@@ -99,12 +99,25 @@ public class SortedArray<T> extends AbstractCollection<T> implements Serializabl
 
     public T removeByIndex(int index) {
         checkIndexInRange(index);
+        T result = elements[index];
         if (index < --size) {
             System.arraycopy(elements, index + 1, elements, index, size - index);
         }
-        T result = elements[size];
         elements[size] = null;
         return result;
+    }
+    
+    public void removeBefore(int index) {
+        if (index <= 0) {
+            return;
+        }
+        if (index >= size) {
+            clear();
+            return;
+        }
+        size -= index;
+        System.arraycopy(elements, index, elements, 0, size);
+        Arrays.fill(elements, size, size + index, null);
     }
 
     public Iterator<T> iterator() {
