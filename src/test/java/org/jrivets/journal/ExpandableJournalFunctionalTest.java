@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.Ignore;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -292,6 +293,35 @@ public class ExpandableJournalFunctionalTest {
                 .withFolderName(IOUtils.temporaryDirectory + "1234ka983kjf13hkjahd").buildExpandable();
     }
 
+    @Ignore
+    @Test
+    public void stressTest() throws IOException {
+        journal.close();
+        long capacity = 1000000000;
+        long chunk = capacity/10;
+        int piece = (int) chunk/10000;
+        journal = new JournalBuilder().withMaxCapacity(capacity).withMaxChunkSize(chunk).withPrefixName(PREFIX)
+                .withFolderName(IOUtils.temporaryDirectory).buildExpandable();
+        long start = System.currentTimeMillis();
+        long size = 0;
+        while (size < capacity) {
+            byte[] data = getShuffledByteArray(piece);
+            journal.getOutputStream().write(data);
+            size += data.length;
+        }
+        
+        while (true) {
+            byte[] data = new byte[piece];
+            int read = journal.getInputStream().read(data);
+            if (read == -1) {
+                break;
+            }
+            assertEquals(data.length, read);
+        }
+        long total = (System.currentTimeMillis() - start);
+        long piecesPerSec = (capacity/piece)/(total/1000L);
+        System.out.println("Total read/write 1G: " + total + "ms pieces/sec=" + piecesPerSec + " Megabytes per second=" + (capacity/(total/1000L)));
+    }
     
     private byte[] getShuffledByteArray(int size) {
         byte[] array = new byte[size];
