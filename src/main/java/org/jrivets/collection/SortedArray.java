@@ -104,6 +104,7 @@ public class SortedArray<T> extends AbstractCollection<T> implements Serializabl
             System.arraycopy(elements, index + 1, elements, index, size - index);
         }
         elements[size] = null;
+        shrinkCapacityAfterDelete();
         return result;
     }
     
@@ -118,6 +119,7 @@ public class SortedArray<T> extends AbstractCollection<T> implements Serializabl
         size -= index;
         System.arraycopy(elements, index, elements, 0, size);
         Arrays.fill(elements, size, size + index, null);
+        shrinkCapacityAfterDelete();
     }
 
     public Iterator<T> iterator() {
@@ -179,6 +181,10 @@ public class SortedArray<T> extends AbstractCollection<T> implements Serializabl
         return hashCode;
     }
 
+    int capacity() {
+        return elements.length;
+    }
+    
     @SuppressWarnings("unchecked")
     private void setCapacity(int newCapacity) {
         if (newCapacity < size) {
@@ -199,6 +205,12 @@ public class SortedArray<T> extends AbstractCollection<T> implements Serializabl
 
     private void ensureCapacityBeforeInsertion() {
         if (size == elements.length) {
+            setCapacity(size * 3 / 2 + 1);
+        }
+    }
+    
+    private void shrinkCapacityAfterDelete() {
+        if (size <= elements.length/2 && elements.length > 100) {
             setCapacity(size * 3 / 2 + 1);
         }
     }

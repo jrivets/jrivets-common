@@ -307,4 +307,40 @@ public class SortedArrayTest {
         sa.removeBefore(100);
         assertEquals(sa.size(), 0);
     }
+    
+    @Test
+    public void shrinkCapacityTest() {
+        SortedArray<Integer> sa = new SortedArray<Integer>(1000);
+        assertEquals(1000, sa.capacity());
+        for (int i = 0; i < 1000; i++) {
+            sa.add(i);
+        }
+        assertEquals(1000, sa.capacity());
+        
+        for (int i = 0; i < 500; i++) {
+            sa.removeByIndex(i);
+        }
+        assertEquals(sa.capacity(), 751);
+        for (int i = 0; i < 500; i++) {
+            assertEquals(sa.get(i), new Integer(i*2 + 1));
+        }
+        assertEquals(sa.size(), 500);
+    }
+    
+    @Test
+    public void shrinkCapacityTest2() {
+        SortedArray<Integer> sa = new SortedArray<Integer>(1000);
+        assertEquals(1000, sa.capacity());
+        for (int i = 0; i < 1000; i++) {
+            sa.add(i);
+        }
+        assertEquals(1000, sa.capacity());
+        
+        sa.removeBefore(950);
+        assertEquals(sa.capacity(), 76);
+        for (int i = 0; i < 50; i++) {
+            assertEquals(sa.get(i), new Integer(i + 950));
+        }
+        assertEquals(sa.size(), 50);
+    }
 }

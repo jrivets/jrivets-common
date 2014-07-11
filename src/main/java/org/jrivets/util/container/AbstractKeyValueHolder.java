@@ -20,11 +20,11 @@ import java.util.Map;
  */
 public abstract class AbstractKeyValueHolder<K, V> {
 
-    private class Holder {
+    protected class Holder {
         
         private V value;
         
-        private final K key;
+        final K key;
         
         private volatile long accessTime = -1L;
         
@@ -49,15 +49,39 @@ public abstract class AbstractKeyValueHolder<K, V> {
             }
             return value;
         }
+
+        @Override
+        public int hashCode() {
+            return (key == null) ? 0 : key.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            @SuppressWarnings("unchecked")
+            Holder other = (Holder) obj;
+            if (key == null) {
+                return other.key == null;
+            }
+            return key.equals(other.key);
+        }
     }
     
-    private final Map<K, Holder> holders = new HashMap<K, Holder>();
+    protected final Map<K, Holder> holders = new HashMap<K, Holder>();
     
     private final long expirationTimeout;
     
     private final long sweepTimeout;
     
-    private final int maxSize;
+    protected final int maxSize;
     
     private final boolean timeoutAfterLastTouch;
     
@@ -72,6 +96,9 @@ public abstract class AbstractKeyValueHolder<K, V> {
     }
     
     protected AbstractKeyValueHolder(long expirationTimeoutMs, int maxSize, boolean timeoutAfterLastTouch) {
+        if (maxSize < 1) {
+            throw new IllegalArgumentException("maxSize=" + maxSize + " should be greater than 0.");
+        }
         this.expirationTimeout = expirationTimeoutMs;
         this.sweepTimeout = expirationTimeoutMs / 5;
         this.maxSize = maxSize;
@@ -89,6 +116,7 @@ public abstract class AbstractKeyValueHolder<K, V> {
                             Holder holder = e.getValue();
                             if (!holder.isNew() && (timeMillis - holder.getLastAccessTime() >= expirationTimeout)) {
                                 it.remove();
+                                onRemove(holder);
                             }
                         }
                     }
@@ -100,7 +128,7 @@ public abstract class AbstractKeyValueHolder<K, V> {
     
     protected abstract V getNewValue(K key);
     
-    private synchronized Holder getHolderByKey(K key) {
+    protected synchronized Holder getHolderByKey(K key) {
         Holder holder = holders.get(key);
         if (holder == null) {
             holder = new Holder(key);
@@ -129,10 +157,13 @@ public abstract class AbstractKeyValueHolder<K, V> {
     
     public synchronized final void clear() {
         holders.clear();
+        onClear();
     }
 
     public synchronized boolean drop(K key) {
-        return holders.remove(key) != null;
+        Holder holder = holders.remove(key);
+        onRemove(holder);
+        return holder != null;
     }
     
     public boolean containsKey(K key) {
@@ -140,5 +171,13 @@ public abstract class AbstractKeyValueHolder<K, V> {
         synchronized(this) {
             return holders.containsKey(key);
         }
+    }
+    
+    protected void onRemove(Holder holder) {
+        
+    }
+    
+    protected void onClear() {
+        
     }
 }

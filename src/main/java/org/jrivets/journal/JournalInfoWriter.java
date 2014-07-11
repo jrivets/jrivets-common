@@ -19,6 +19,7 @@ final class JournalInfoWriter {
     
     private ByteBuffer buffer = ByteBuffer.allocateDirect(56);
     
+    @SuppressWarnings("resource")
     JournalInfoWriter(File metaFile) throws IOException {
         channel = new RandomAccessFile(metaFile, "rw").getChannel();
         try {

@@ -297,7 +297,7 @@ public class ExpandableJournalFunctionalTest {
     @Test
     public void stressTest() throws IOException {
         journal.close();
-        long capacity = 1000000000;
+        long capacity = 1000000000L;
         long chunk = capacity/10;
         int piece = (int) chunk/10000;
         journal = new JournalBuilder().withMaxCapacity(capacity).withMaxChunkSize(chunk).withPrefixName(PREFIX)
