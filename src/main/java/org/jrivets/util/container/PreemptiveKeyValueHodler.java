@@ -50,6 +50,7 @@ public abstract class PreemptiveKeyValueHodler<K, V> extends AbstractKeyValueHol
                 treeSet.remove(toRemove);
                 holders.remove(toRemove.key);
                 treeSet.remove(toRemove);
+                onPush(toRemove);
             }
             holders.put(key, holder);
         }
@@ -72,4 +73,5 @@ public abstract class PreemptiveKeyValueHodler<K, V> extends AbstractKeyValueHol
         treeSet.clear();
     }
 
+    protected abstract void onPush(Holder holder);
 }

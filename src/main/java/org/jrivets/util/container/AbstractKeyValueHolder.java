@@ -24,7 +24,7 @@ public abstract class AbstractKeyValueHolder<K, V> {
         
         private V value;
         
-        final K key;
+        public final K key;
         
         private volatile long accessTime = -1L;
         

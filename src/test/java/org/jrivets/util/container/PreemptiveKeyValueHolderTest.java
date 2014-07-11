@@ -13,6 +13,8 @@ public class PreemptiveKeyValueHolderTest {
 
     private List<Integer> requests = new ArrayList<Integer>();
     
+    private List<Integer> pushes = new ArrayList<Integer>();
+    
     private class PreemptiveHolderImpl extends PreemptiveKeyValueHodler<Integer, Integer> {
 
         protected PreemptiveHolderImpl(long expirationTimeoutMs, int maxSize) {
@@ -24,12 +26,18 @@ public class PreemptiveKeyValueHolderTest {
             requests.add(key);
             return key;
         }
+
+        @Override
+        protected void onPush(AbstractKeyValueHolder<Integer, Integer>.Holder holder) {
+            pushes.add(holder.key);
+        }
         
     }
     
     @BeforeMethod
     private void init() {
         requests.clear();
+        pushes.clear();
     }
     
     @Test
@@ -39,6 +47,7 @@ public class PreemptiveKeyValueHolderTest {
         assertEquals(ph.getValue(1), new Integer(1));
         assertEquals(ph.getValue(1), new Integer(1));
         
+        assertEquals(pushes.size(), 0);
         assertEquals(requests.size(), 1);
         assertEquals(requests.get(0), new Integer(1));
     }
@@ -51,6 +60,7 @@ public class PreemptiveKeyValueHolderTest {
         assertEquals(ph.getValue(1), new Integer(1));
         
         assertEquals(requests.size(), 3);
+        assertEquals(pushes, Arrays.asList(1, 2));
         assertEquals(requests, Arrays.asList(1, 2, 1));
     }
     
@@ -66,6 +76,7 @@ public class PreemptiveKeyValueHolderTest {
         assertEquals(ph.getValue(1), new Integer(1));
         
         assertEquals(requests.size(), 4);
+        assertEquals(pushes, Arrays.asList(1, 2));
         assertEquals(requests, Arrays.asList(1, 2, 3, 1));
     }
     
@@ -85,6 +96,7 @@ public class PreemptiveKeyValueHolderTest {
         assertEquals(ph.getValue(2), new Integer(2));
         
         assertEquals(requests.size(), 4);
+        assertEquals(pushes, Arrays.asList(2, 3));
         assertEquals(requests, Arrays.asList(1, 2, 3, 2));
     }
 
