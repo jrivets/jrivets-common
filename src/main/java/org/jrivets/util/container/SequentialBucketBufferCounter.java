@@ -9,7 +9,7 @@ import org.jrivets.collection.RingBuffer;
  * objects is always counted for a bucket (integer number) which cannot be less
  * than last mentioned one. The size of buffer is limited by number of the
  * buckets, so when objects are counted for a bucket with number N, all buckets
- * wiht number less than <code>N - size + 1</code> will be removed.
+ * with number less than <code>N - size + 1</code> will be removed.
  * 
  * @author Dmitry Spasibenko
  *
@@ -18,15 +18,15 @@ public class SequentialBucketBufferCounter {
 
     private final RingBuffer<VHolder> buffer;
 
-    private int count;
+    private long count;
 
     private static class VHolder {
 
-        final int bucket;
+        final long bucket;
 
-        int count;
+        long count;
 
-        VHolder(int bucket) {
+        VHolder(long bucket) {
             this.bucket = bucket;
         }
     }
@@ -52,7 +52,7 @@ public class SequentialBucketBufferCounter {
      * @param count
      *            - amount should be added to the bucket
      */
-    public void add(int bucket, int count) {
+    public void add(long bucket, long count) {
         if (buffer.size() > 0 && buffer.last().bucket > bucket) {
             throw new IllegalArgumentException("bucket=" + bucket + " should be equal or bigger than existing one "
                     + buffer.last().bucket);
@@ -68,12 +68,12 @@ public class SequentialBucketBufferCounter {
     /**
      * @return cumulative counter for the buffer
      */
-    public int getTotalCount() {
+    public long getTotalCount() {
         return count;
     }
 
-    private void sweep(int lastBacket) {
-        int headAcceptable = lastBacket - buffer.capacity() + 1;
+    private void sweep(long lastBacket) {
+        long headAcceptable = lastBacket - buffer.capacity() + 1;
         while (buffer.size() > 0 && buffer.element().bucket < headAcceptable) {
             count -= buffer.remove().count;
         }
