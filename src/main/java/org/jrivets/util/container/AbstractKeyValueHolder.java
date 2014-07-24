@@ -40,7 +40,7 @@ public abstract class AbstractKeyValueHolder<K, V> {
             return accessTime;
         }
         
-        synchronized V getValue() {
+        public synchronized V getValue() {
             if (isNew()) {
                 value = getNewValue(key);
                 accessTime = System.currentTimeMillis();
