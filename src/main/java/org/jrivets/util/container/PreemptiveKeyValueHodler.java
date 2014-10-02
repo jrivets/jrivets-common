@@ -73,5 +73,10 @@ public abstract class PreemptiveKeyValueHodler<K, V> extends AbstractKeyValueHol
         treeSet.clear();
     }
 
+    /**
+     * The method is called when Holder is pushed out of the container in case of 
+     * maximum size reached
+     * @param holder
+     */
     protected abstract void onPush(Holder holder);
 }

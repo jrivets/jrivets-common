@@ -156,8 +156,8 @@ public abstract class AbstractKeyValueHolder<K, V> {
     }
     
     public synchronized final void clear() {
-        holders.clear();
         onClear();
+        holders.clear();
     }
 
     public synchronized boolean drop(K key) {
@@ -173,6 +173,10 @@ public abstract class AbstractKeyValueHolder<K, V> {
         }
     }
     
+    /**
+     * The method is called when holder is removed from the container 
+     * @param holder
+     */
     protected void onRemove(Holder holder) {
         
     }
