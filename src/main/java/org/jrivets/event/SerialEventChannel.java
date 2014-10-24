@@ -5,10 +5,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jrivets.collection.RingBuffer;
-import org.jrivets.env.DefaultLockFactory;
-import org.jrivets.env.LockFactory;
 import org.jrivets.log.Logger;
 import org.jrivets.log.LoggerFactory;
 
@@ -48,7 +47,7 @@ public class SerialEventChannel implements EventChannel {
 
     private final Logger logger;
 
-    private final Lock lock;
+    private final Lock lock = new ReentrantLock();
 
     private Condition condition;
 
@@ -75,18 +74,13 @@ public class SerialEventChannel implements EventChannel {
     }
 
     public SerialEventChannel(String name, int capacity, Executor executor) {
-        this(name, capacity, executor, DefaultLockFactory.getInstance());
-    }
-
-    public SerialEventChannel(String name, int capacity, Executor executor, LockFactory lockFactory) {
-        this(name, capacity, executor, lockFactory, new SubscribersRegistry(
+        this(name, capacity, executor, new SubscribersRegistry(
                 CommonSubscriberTypeParserProvider.getSubscriberTypeParser()));
     }
 
-    SerialEventChannel(String name, int capacity, Executor executor, LockFactory lockFactory,
+    SerialEventChannel(String name, int capacity, Executor executor, 
             SubscribersRegistry subscribersRegistry) {
         this.logger = LoggerFactory.getLogger(SerialEventChannel.class, name + "(%1$s): %2$s", state);
-        this.lock = lockFactory.getReentrantLock();
         this.events = new RingBuffer<Object>(capacity);
         this.executor = executor;
         this.subscribersRegistry = subscribersRegistry;

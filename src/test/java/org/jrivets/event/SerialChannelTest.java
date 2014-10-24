@@ -28,7 +28,6 @@ public class SerialChannelTest {
         events.clear();
     }
     
-    @SuppressWarnings("unused")
     @OnEvent
     private synchronized void onEventInteger(Integer i) {
         events.add(i);

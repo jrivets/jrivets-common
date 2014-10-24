@@ -27,7 +27,6 @@ public class SubscriberTypeParserTest {
     }
     
     class SimpleSimpleEventSubscriber {
-        @SuppressWarnings("unused")
         @OnEvent
         private void simpleEvent(SimpleSimpleEvent se) {
             System.out.println("SimpleSimpleEventSubscriber gets SimpleSimpleEvent");

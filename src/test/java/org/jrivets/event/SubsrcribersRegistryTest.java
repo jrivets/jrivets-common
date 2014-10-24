@@ -21,13 +21,11 @@ public class SubsrcribersRegistryTest {
     }
     
     private class A {
-        @SuppressWarnings("unused")
         @OnEvent
         void integer(Integer i) {
         }
     }
 
-    @SuppressWarnings("unused")
     private class B {
         @OnEvent
         void integer(Integer i) {

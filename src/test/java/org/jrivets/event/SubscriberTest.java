@@ -9,7 +9,6 @@ import org.testng.annotations.Test;
 
 public class SubscriberTest {
 
-    @SuppressWarnings("unused")
     private static class TestListener {
         
         @OnEvent

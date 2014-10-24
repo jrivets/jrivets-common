@@ -44,15 +44,16 @@ public class JournalInfoWriterTest {
     
     @Test
     public void wrongFile() throws IOException {
-        FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel();
-        ByteBuffer bb = ByteBuffer.allocate(22);
-        bb.clear();
-        bb.putLong(System.currentTimeMillis());
-        bb.putInt(123456789);
-        bb.putLong(1234798749273493L);
-        bb.flip();
-        fc.write(bb);
-        fc.close();
+        try (@SuppressWarnings("resource")
+        FileChannel fc = new RandomAccessFile(tmpFile, "rw").getChannel()) {
+            ByteBuffer bb = ByteBuffer.allocate(22);
+            bb.clear();
+            bb.putLong(System.currentTimeMillis());
+            bb.putInt(123456789);
+            bb.putLong(1234798749273493L);
+            bb.flip();
+            fc.write(bb);
+        } 
         
         JournalInfoWriter pos = new JournalInfoWriter(tmpFile);
         assertEquals(JournalInfo.NULL_INFO, pos.get());
