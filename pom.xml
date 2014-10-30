@@ -8,8 +8,8 @@
 
 	<properties>
 		<log4j.version>1.2.16</log4j.version>
-		<testng.version>6.8</testng.version>
 		<mockito-all.version>1.9.0</mockito-all.version>
+		<testng.version>6.8</testng.version>
 	</properties>
 
 	<dependencies>
