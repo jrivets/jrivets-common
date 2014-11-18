@@ -18,7 +18,7 @@ import java.util.TreeSet;
  * @param <V>
  */
 
-public abstract class PreemptiveKeyValueHodler<K, V> extends AbstractKeyValueHolder<K, V> {
+public abstract class PreemptiveKeyValueHolder<K, V> extends AbstractKeyValueHolder<K, V> {
 
     private TreeSet<Holder> treeSet = new TreeSet<Holder>(new HolderComparator());
 
@@ -35,7 +35,7 @@ public abstract class PreemptiveKeyValueHodler<K, V> extends AbstractKeyValueHol
 
     }
 
-    protected PreemptiveKeyValueHodler(long expirationTimeoutMs, int maxSize) {
+    protected PreemptiveKeyValueHolder(long expirationTimeoutMs, int maxSize) {
         super(expirationTimeoutMs, maxSize, true);
 
     }

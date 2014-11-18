@@ -15,7 +15,7 @@ public class PreemptiveKeyValueHolderTest {
     
     private List<Integer> pushes = new ArrayList<Integer>();
     
-    private class PreemptiveHolderImpl extends PreemptiveKeyValueHodler<Integer, Integer> {
+    private class PreemptiveHolderImpl extends PreemptiveKeyValueHolder<Integer, Integer> {
 
         protected PreemptiveHolderImpl(long expirationTimeoutMs, int maxSize) {
             super(expirationTimeoutMs, maxSize);
