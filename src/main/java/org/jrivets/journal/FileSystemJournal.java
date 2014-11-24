@@ -1,11 +1,10 @@
 package org.jrivets.journal;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 
 final class FileSystemJournal implements Journal {
     
-    private final AbstractChunkingPolicy policy;
+    final AbstractChunkingPolicy policy;
     
     private final JournalInputStream in;
     
@@ -18,7 +17,7 @@ final class FileSystemJournal implements Journal {
     }
 
     @Override
-    public InputStream getInputStream() {
+    public JournalInputStream getInputStream() {
         return in;
     }
 
@@ -35,5 +34,10 @@ final class FileSystemJournal implements Journal {
     @Override
     public String toString() {
         return policy.toString();
+    }
+
+    @Override
+    public long available() {
+        return policy.totalAvailable();
     }
 }

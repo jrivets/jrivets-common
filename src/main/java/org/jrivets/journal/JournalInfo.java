@@ -14,6 +14,9 @@ final class JournalInfo {
 
     private final Pair<Integer, Long> writer;
 
+    /**
+     * The maximal distance that could be between mark and read position
+     */
     private final int readLimit;
 
     JournalInfo(Pair<Integer, Long> marker, Pair<Integer, Long> reader, Pair<Integer, Long> writer, int readLimit) {
@@ -34,7 +37,7 @@ final class JournalInfo {
     public Pair<Integer, Long> getWriter() {
         return writer;
     }
-    
+
     public int getReadLimit() {
         return readLimit;
     }

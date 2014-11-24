@@ -24,9 +24,12 @@ import org.jrivets.log.LoggerFactory;
  * 
  */
 final class ChunkingPolicy extends AbstractChunkingPolicy {
+    
+    private final boolean singleWrite;
 
-    ChunkingPolicy(long maxCapacity, long maxChunkSize, String folderName, String prefixName, boolean neverEof, boolean cleanAfterOpen) throws IOException {
-        super(LoggerFactory.getLogger(ChunkingPolicy.class, "(" + prefixName + ") %2$s", null), maxCapacity, maxChunkSize, folderName, prefixName, neverEof);
+    ChunkingPolicy(long maxCapacity, long maxChunkSize, String folderName, String prefixName, boolean cleanAfterOpen, boolean singleWrite) throws IOException {
+        super(LoggerFactory.getLogger(ChunkingPolicy.class, "(" + prefixName + ") %2$s", null), maxCapacity, maxChunkSize, folderName, prefixName, cleanAfterOpen);
+        this.singleWrite = singleWrite;
         init(cleanAfterOpen);
         logger.info("New ChunkingPolicy: ", this);
     }
@@ -45,7 +48,7 @@ final class ChunkingPolicy extends AbstractChunkingPolicy {
                 throw new IllegalStateException("Could not find file-chunk " + file);
             }
             long capacity = file.length();
-            Chunk chunk = new Chunk(id, capacity, file, true);
+            Chunk chunk = new Chunk(id, capacity, file, true, singleWrite);
             chunks.add(chunk);
         }
         nextChunkId = getNextChunkId(journalInfo.getWriter().getFirst());
@@ -83,7 +86,7 @@ final class ChunkingPolicy extends AbstractChunkingPolicy {
         if (outputChunk != null) {
             outputChunk.closeOut(); // previous one is not going to be used anymore
         }
-        outputChunk = new Chunk(nextChunkId, capacity, file, false);
+        outputChunk = new Chunk(nextChunkId, capacity, file, false, singleWrite);
         chunks.add(outputChunk);
         nextChunkId = getNextChunkId(nextChunkId);
         logger.debug("newChunk(): New chunk is creaged ", outputChunk, ", nextChunkId=", nextChunkId);

@@ -22,8 +22,6 @@ abstract class AbstractChunkingPolicy {
 
     final String prefixName;
 
-    final boolean neverEof; // Input stream never returns -1 on read()
-
     protected final Logger logger;
 
     protected int nextChunkId;
@@ -49,7 +47,7 @@ abstract class AbstractChunkingPolicy {
     protected final JournalInfoWriter journalInfoWriter;
 
     protected AbstractChunkingPolicy(Logger logger, long maxCapacity, long maxChunkSize, String folderName,
-            String prefixName, boolean neverEof) throws IOException {
+            String prefixName, boolean dropOldData) throws IOException {
         if (maxCapacity < 0 || maxChunkSize < 0 || maxChunkSize > maxCapacity) {
             throw new IllegalArgumentException("maxCapacity=" + maxCapacity
                     + " should be positive and not less than maxChunkSize=" + maxChunkSize);
@@ -59,8 +57,7 @@ abstract class AbstractChunkingPolicy {
         this.maxChunkSize = maxChunkSize;
         this.folderName = folderName;
         this.prefixName = prefixName;
-        this.neverEof = neverEof;
-        this.journalInfoWriter = new JournalInfoWriter(new File(folderName, prefixName));
+        this.journalInfoWriter = new JournalInfoWriter(new File(folderName, prefixName), dropOldData);
     }
 
     void mark(int readLimit) {
@@ -93,11 +90,11 @@ abstract class AbstractChunkingPolicy {
      * @return whether the input stream should have new data to be read.
      * @throws IOException
      */
-    boolean syncInput(boolean waitNewData) throws IOException {
+    boolean syncInput(boolean waitNewData, long timeout) throws IOException {
         Chunk ic = adjustInputChunk();
-        if (waitNewData && neverEof) {
+        if (waitNewData && timeout > 0L) {
             logger.debug("syncInput(): waiting for ", ic);
-            ic.waitDataToRead();
+            ic.waitDataToRead(timeout);
             logger.debug("syncInput(): done with ", ic);
         }
         return ic.isReadyToRead();
@@ -139,20 +136,7 @@ abstract class AbstractChunkingPolicy {
                         inputChunk.setReadPosition(0L);
                         break;
                     }
-                    // Ok, we reached max capacity, but still can return -1 if
-                    // it is acceptable
-                    if (!neverEof) {
-                        return inputChunk;
-                    }
-                    // Well, we are blocked: we cannot wait for write, because
-                    // write is blocked
-                    // by maximum capacity and is waiting for read probably.
-                    // This is potential dead-locking, so throw exception to let
-                    // caller
-                    // know about incorrect settings or usage of the journal.
-                    logger.warn("adjustInputChunk(): Something goes wrong ", this, ", chunks=", chunks);
-                    throw new IllegalStateException(
-                            "Input stream is blocked because of no sufficient disk space in the journal. This can be caused by wrong journal configuration.");
+                    return inputChunk;
                 }
                 int idx = chunks.indexOf(inputChunk);
                 inputChunk = chunks.get(idx + 1);
@@ -221,6 +205,23 @@ abstract class AbstractChunkingPolicy {
         }
     }
 
+    long totalAvailable() {
+        return availableForInput() + getToMarkLength();
+    }
+
+    long availableForInput() {
+        long result = 0;
+        boolean inputChunkFound = false;
+        for (Chunk chunk: chunks) {
+            if (!inputChunkFound && chunk != inputChunk) {
+                continue;
+            }
+            inputChunkFound = true;
+            result += chunk.available();
+        }
+        return result;
+    }
+
     protected long getTotalCapacity() {
         long total = 0L;
         for (Chunk chunk : chunks) {
@@ -229,7 +230,7 @@ abstract class AbstractChunkingPolicy {
         return total;
     }
 
-    protected long getToMarkLength() {
+    long getToMarkLength() {
         if (markedChunk == null) {
             return 0L;
         }
@@ -310,10 +311,9 @@ abstract class AbstractChunkingPolicy {
     public String toString() {
         return new StringBuilder().append("Journal{maxCapacity=").append(maxCapacity).append(", maxChunkSize=")
                 .append(maxChunkSize).append(", folderName=").append(folderName).append(", prefixName=")
-                .append(prefixName).append(", neverEof=").append(neverEof).append(", nextChunkId=").append(nextChunkId)
-                .append(", inputChunk=").append(inputChunk).append(", outputChunk=").append(outputChunk)
-                .append(", markedChunk=").append(markedChunk).append(", markedPos=").append(markedPos)
-                .append(", readLimit=").append(readLimit).append(", journalInfoWriter=").append(journalInfoWriter)
-                .append("}").toString();
+                .append(prefixName).append(", nextChunkId=").append(nextChunkId).append(", inputChunk=")
+                .append(inputChunk).append(", outputChunk=").append(outputChunk).append(", markedChunk=")
+                .append(markedChunk).append(", markedPos=").append(markedPos).append(", readLimit=").append(readLimit)
+                .append(", journalInfoWriter=").append(journalInfoWriter).append("}").toString();
     }
 }

@@ -161,9 +161,7 @@ public abstract class AbstractKeyValueHolder<K, V> {
     }
 
     public synchronized boolean drop(K key) {
-        Holder holder = holders.remove(key);
-        onRemove(holder);
-        return holder != null;
+        return dropUnsafe(key);
     }
     
     public boolean containsKey(K key) {
@@ -171,6 +169,12 @@ public abstract class AbstractKeyValueHolder<K, V> {
         synchronized(this) {
             return holders.containsKey(key);
         }
+    }
+    
+    protected boolean dropUnsafe(K key) {
+        Holder holder = holders.remove(key);
+        onRemove(holder);
+        return holder != null;
     }
     
     /**

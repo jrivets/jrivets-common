@@ -22,9 +22,9 @@ public final class JournalBuilder {
 
     String prefixName;
 
-    boolean neverEof;
-
     private boolean cleanAfterOpen;
+
+    private boolean singleWrite;
 
     /**
      * Allows to set maximum journal (size) capacity. Default is
@@ -97,17 +97,16 @@ public final class JournalBuilder {
     }
 
     /**
-     * Defines read methods for input stream behavior in case EOF is reached.
-     * Normally, the read methods returns -1 for the case the EOF is reached,
-     * but if the journal is built with {@code blockedInputStream=true} the
-     * input stream read methods will be blocked until new data is written if
-     * the EOF is reached.
+     * The <code>singleWrite</code> flag controls how write operation will be
+     * performed. If the flag value is <code>true</code> then the written buffer
+     * value cannot be split between different chunks and all buffer will be
+     * written into one chunk, even if the chunk's capacity will be exceeded.
      * 
-     * @param blockedInputStream
-     * @return the builder object
+     * @param singleWrite
+     * @return
      */
-    public JournalBuilder withBlockedInputStream(boolean blockedInputStream) {
-        this.neverEof = blockedInputStream;
+    public JournalBuilder withSingleWrite(boolean singleWrite) {
+        this.singleWrite = singleWrite;
         return this;
     }
 
@@ -167,8 +166,8 @@ public final class JournalBuilder {
             throw new IllegalArgumentException("maxChunksSize=" + maxChunkSize
                     + " should not be greater than maxCapacity=" + maxCapacity);
         }
-        return new FileSystemJournal(new ChunkingPolicy(maxCapacity, maxChunkSize, folderName, prefixName, neverEof,
-                cleanAfterOpen));
+        return new FileSystemJournal(new ChunkingPolicy(maxCapacity, maxChunkSize, folderName, prefixName,
+                cleanAfterOpen, singleWrite));
     }
 
 }

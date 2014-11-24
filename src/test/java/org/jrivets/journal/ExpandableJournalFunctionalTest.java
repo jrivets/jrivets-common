@@ -91,19 +91,6 @@ public class ExpandableJournalFunctionalTest {
         assertEquals(journal.getInputStream().read(), -1);
     }
     
-    @Test(expectedExceptions = {IllegalStateException.class})
-    public void fullMarkWithBlockedReadTest() throws IOException {
-        journal.close();
-        journal = new JournalBuilder().withMaxCapacity(100).withMaxChunkSize(10).withPrefixName(PREFIX)
-                .withFolderName(IOUtils.temporaryDirectory).withBlockedInputStream(true).buildExpandable();
-        
-        byte[] array = getOrderedByteArray(100);
-        journal.getOutputStream().write(array, 0, array.length);
-        journal.getInputStream().mark(array.length + 3);
-        assertEquals(array.length, journal.getInputStream().read(array));
-        journal.getInputStream().read();
-    }
-    
     @Test(expectedExceptions={IOException.class})
     public void resetOverflowTest() throws IOException {
         byte[] array = getShuffledByteArray(50);
@@ -134,7 +121,7 @@ public class ExpandableJournalFunctionalTest {
     public void noEofTest() throws IOException {
         journal.close();
         journal = new JournalBuilder().withMaxCapacity(100).withMaxChunkSize(10).withPrefixName(PREFIX)
-                .withFolderName(IOUtils.temporaryDirectory).withBlockedInputStream(true).buildExpandable();
+                .withFolderName(IOUtils.temporaryDirectory).buildExpandable();
         final byte[] read = new byte[1];
         final AtomicBoolean b = new AtomicBoolean();
         
@@ -143,7 +130,7 @@ public class ExpandableJournalFunctionalTest {
             public void run() {
                 b.set(true);
                 try {
-                    read[0] = (byte) journal.getInputStream().read();
+                    journal.getInputStream().read(read, 0, 1, 10000L);
                 } catch (IOException e) {
                 } finally {
                     b.set(false);
@@ -321,6 +308,53 @@ public class ExpandableJournalFunctionalTest {
         long total = (System.currentTimeMillis() - start);
         long piecesPerSec = (capacity/piece)/(total/1000L);
         System.out.println("Total read/write 1G: " + total + "ms pieces/sec=" + piecesPerSec + " Megabytes per second=" + (capacity/(total/1000L)));
+    }
+    
+    @Test
+    public void availableForReadTest() throws IOException {
+        byte[] array = getShuffledByteArray(55);
+        FileSystemJournal fsJournal = (FileSystemJournal) journal;
+        fsJournal.getOutputStream().write(array, 0, array.length);
+        assertEquals(fsJournal.policy.chunks.size(), 6);
+        
+        assertEquals(fsJournal.getInputStream().available(), 55);
+        assertEquals(fsJournal.available(), 55);
+        fsJournal.getInputStream().read();
+        fsJournal.getInputStream().read();
+        assertEquals(fsJournal.getInputStream().available(), 53);
+        assertEquals(fsJournal.available(), 53);
+        
+        fsJournal.getInputStream().read(array, 0, 12, 0L);
+        assertEquals(fsJournal.getInputStream().available(), 41);
+        assertEquals(fsJournal.available(), 41);
+        
+        fsJournal.getInputStream().mark(100);
+        fsJournal.getInputStream().read(array, 0, 14, 0L);
+        assertEquals(fsJournal.getInputStream().available(), 27);
+        assertEquals(fsJournal.available(), 41);
+    }
+    
+    @Test
+    public void readTimeoutEmptyTest() throws IOException {
+        byte[] array = getShuffledByteArray(100);
+        journal.getOutputStream().write(array, 0, 50);
+        journal.getInputStream().read(array, 0, 50);
+        readTimeoutTest();
+        
+        journal.getOutputStream().write(array, 0, 100);
+        journal.getInputStream().read(array, 0, 100);
+        readTimeoutTest();
+    }
+    
+    private void readTimeoutTest() throws IOException { 
+        byte[] array = new byte[10];
+        long start = System.currentTimeMillis();
+        assertEquals(journal.getInputStream().read(array, 0, 10), -1);
+        assertTrue(System.currentTimeMillis() - start < 50L);
+        
+        start = System.currentTimeMillis();
+        assertEquals(journal.getInputStream().read(array, 0, 10, 50L), -1);
+        assertTrue(System.currentTimeMillis() - start >= 50L);
     }
     
     private byte[] getShuffledByteArray(int size) {

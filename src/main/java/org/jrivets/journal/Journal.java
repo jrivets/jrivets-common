@@ -1,6 +1,5 @@
 package org.jrivets.journal;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -19,7 +18,7 @@ public interface Journal {
      * 
      * @return journal {@code InputStream} object
      */
-    InputStream getInputStream();
+    JournalInputStream getInputStream();
 
     /**
      * Returns output stream for the journal. The result for the method call is
@@ -28,6 +27,17 @@ public interface Journal {
      * @return journal {@code OutputStream} object
      */
     OutputStream getOutputStream();
+
+    /**
+     * Returns number of bytes available for read. This amount also includes
+     * marked chunk, which already could be read, but which could be reset back
+     * to be available for the read operation again. If no markers, the result
+     * is same as what <code>getInputStream().abailable()</code> returns.
+     * 
+     * @return total number of bytes that can be accessible via
+     *         <code>getInputStream()</code> stream.
+     */
+    long available();
 
     /**
      * Closes input and output data streams for the journal. Read/write attempts

@@ -23,7 +23,7 @@ public class ChunkTest {
         public void run() {
             try {
                 readers++;
-                chunk.waitDataToRead();
+                chunk.waitDataToRead(Long.MAX_VALUE);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -50,7 +50,7 @@ public class ChunkTest {
     public void appendTest() throws IOException {
         writeBytes(testFile, 0, 100);
         assertEquals(testFile.length(), 100);
-        chunk = new Chunk(1, 23, testFile, false);
+        chunk = new Chunk(1, 23, testFile, false, false);
         assertEquals(testFile.length(), 0);
     }
 
@@ -58,14 +58,14 @@ public class ChunkTest {
     public void appendTest2() throws IOException {
         writeBytes(testFile, 0, 100);
         assertEquals(testFile.length(), 100);
-        chunk = new Chunk(1, 23, testFile, true);
+        chunk = new Chunk(1, 23, testFile, true, false);
         assertEquals(testFile.length(), 100);
     }
 
     @Test
     public void getReadPositionTest() throws IOException {
         writeBytes(testFile, 0, 10);
-        chunk = new Chunk(1, 23, testFile, true);
+        chunk = new Chunk(1, 23, testFile, true, false);
         assertEquals(chunk.getReadPosition(), 0);
         assertEquals(chunk.read(), 0);
         assertEquals(chunk.read(), 1);
@@ -91,7 +91,7 @@ public class ChunkTest {
     @Test
     public void setReadPositionTest() throws IOException {
         writeBytes(testFile, 0, 10);
-        chunk = new Chunk(1, 23, testFile, true);
+        chunk = new Chunk(1, 23, testFile, true, false);
         assertEquals(chunk.getReadPosition(), 0);
         assertEquals(chunk.read(), 0);
         assertEquals(chunk.read(), 1);
@@ -117,7 +117,7 @@ public class ChunkTest {
     @Test
     public void writePositionTest() throws IOException {
         writeBytes(testFile, 0, 10);
-        chunk = new Chunk(1, 23, testFile, true);
+        chunk = new Chunk(1, 23, testFile, true, false);
         assertEquals(chunk.getWritePosition(), 10);
 
         chunk.setWritePosition(-10L);
@@ -136,7 +136,7 @@ public class ChunkTest {
     @Test
     public void writePositionTest2() throws IOException {
         writeBytes(testFile, 0, 10);
-        chunk = new Chunk(1, 23, testFile, false);
+        chunk = new Chunk(1, 23, testFile, false, false);
         assertEquals(chunk.getWritePosition(), 0L);
 
         chunk.setWritePosition(10L);
@@ -145,14 +145,14 @@ public class ChunkTest {
 
     @Test
     public void skipTest() throws IOException {
-        chunk = new Chunk(1, 23, testFile, false);
+        chunk = new Chunk(1, 23, testFile, false, false);
         assertEquals(chunk.skip(100L), 100L);
         assertEquals(chunk.getReadPosition(), 100L);
     }
 
     @Test
     public void reachReadPositionTest() throws IOException {
-        chunk = new Chunk(1, 23, testFile, false);
+        chunk = new Chunk(1, 23, testFile, false, false);
         chunk.setReadPosition(2);
         assertEquals(chunk.read(), -1);
 
@@ -167,7 +167,7 @@ public class ChunkTest {
 
     @Test
     public void writeTest() throws IOException {
-        chunk = new Chunk(1, 1, testFile, false);
+        chunk = new Chunk(1, 1, testFile, false, false);
         assertTrue(chunk.write(1));
         assertFalse(chunk.write(2));
         chunk.setWritePosition(0L);
@@ -177,7 +177,7 @@ public class ChunkTest {
 
     @Test
     public void batchWriteTest() throws IOException {
-        chunk = new Chunk(1, 3, testFile, false);
+        chunk = new Chunk(1, 3, testFile, false, false);
         byte[] data = new byte[] { 1, 2, 3, 4 };
         assertEquals(chunk.write(data, 0, 4), 3);
         assertEquals(1, chunk.read());
@@ -196,10 +196,35 @@ public class ChunkTest {
         assertFalse(chunk.isReadyToRead());
         assertFalse(chunk.isReadyToWrite());
     }
+    
+    @Test
+    public void singleWriteTest() throws IOException {
+        chunk = new Chunk(1, 3, testFile, false, true);
+        byte[] data = new byte[] { 1, 2, 3, 4 };
+        assertEquals(chunk.getCapacity(), 3);
+        assertEquals(chunk.write(data, 0, 4), 4);
+        assertEquals(1, chunk.read());
+        assertEquals(2, chunk.read());
+        assertEquals(3, chunk.read());
+        assertEquals(4, chunk.read());
+        assertEquals(chunk.getCapacity(), 4);
+
+        chunk.setWritePosition(3L);
+        chunk.setReadPosition(3L);
+
+        assertEquals(chunk.write(data, 2, 2), 2);
+        assertEquals(chunk.getCapacity(), 5);
+        assertEquals(3, chunk.read());
+        assertEquals(4, chunk.read());
+
+        assertTrue(chunk.isDone());
+        assertFalse(chunk.isReadyToRead());
+        assertFalse(chunk.isReadyToWrite());
+    }
 
     @Test
     public void differentIsTest() throws IOException {
-        chunk = new Chunk(1, 3, testFile, false);
+        chunk = new Chunk(1, 3, testFile, false, false);
         byte[] data = new byte[] { 1, 2, 3, 4 };
         assertTrue(chunk.isReadyToWrite());
         assertEquals(chunk.write(data, 0, 4), 3);
@@ -217,7 +242,7 @@ public class ChunkTest {
 
     @Test(timeOut = 10000L)
     public void readNotificationTest() throws IOException, InterruptedException {
-        chunk = new Chunk(1, 3, testFile, false);
+        chunk = new Chunk(1, 3, testFile, false, false);
         Thread t = new Thread(new ReadWaiter());
         t.start();
         while (readers == 0) {
@@ -229,7 +254,7 @@ public class ChunkTest {
 
     @Test(timeOut = 10000L)
     public void batchReadNotificationTest() throws IOException, InterruptedException {
-        chunk = new Chunk(1, 3, testFile, false);
+        chunk = new Chunk(1, 3, testFile, false, false);
         Thread t = new Thread(new ReadWaiter());
         t.start();
         while (readers == 0) {
@@ -242,7 +267,7 @@ public class ChunkTest {
 
     @Test(timeOut = 10000L)
     public void isDoneReadNotificationTest() throws IOException, InterruptedException {
-        chunk = new Chunk(1, 3, testFile, false);
+        chunk = new Chunk(1, 3, testFile, false, false);
         Thread t = new Thread(new ReadWaiter());
         t.start();
         while (readers == 0) {
@@ -255,22 +280,30 @@ public class ChunkTest {
 
     @Test(timeOut = 10000L)
     public void isReadyToReadTest() throws IOException, InterruptedException {
-        chunk = new Chunk(1, 3, testFile, false);
+        chunk = new Chunk(1, 3, testFile, false, false);
         chunk.write(1);
-        chunk.waitDataToRead();
+        chunk.waitDataToRead(5000L);
     }
 
     @Test(timeOut = 10000L)
     public void isReadyToReadWhenDoneTest() throws IOException, InterruptedException {
-        chunk = new Chunk(1, 1, testFile, false);
+        chunk = new Chunk(1, 2, testFile, false, false);
         chunk.write(1);
         chunk.read();
-        chunk.waitDataToRead();
+        chunk.read();
+        
+        long start = System.currentTimeMillis();
+        chunk.waitDataToRead(0L);
+        assertTrue(System.currentTimeMillis() - start < 50L);
+        
+        start = System.currentTimeMillis();
+        chunk.waitDataToRead(50L);
+        assertTrue(System.currentTimeMillis() - start >= 50L);
     }
     
     @Test
     public void deleteTest() throws IOException {
-        chunk = new Chunk(1, 1, testFile, false);
+        chunk = new Chunk(1, 1, testFile, false, false);
         assertTrue(testFile.exists());
         chunk.delete();
         assertFalse(testFile.exists());

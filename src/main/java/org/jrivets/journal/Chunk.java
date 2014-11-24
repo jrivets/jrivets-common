@@ -13,7 +13,14 @@ class Chunk {
 
     private final File file;
 
-    private final long capacity;
+    /**
+     * Indicates that write operation can not be split between chunks. This flag
+     * can affect capacity, because a write of a value can follow to exceeding
+     * it.
+     */
+    private final boolean singleWrite;
+
+    private long capacity;
 
     private FileInputStream in;
 
@@ -25,10 +32,11 @@ class Chunk {
 
     private volatile int readers;
 
-    Chunk(int id, long capacity, File file, boolean append) throws IOException {
+    Chunk(int id, long capacity, File file, boolean append, boolean singleWrite) throws IOException {
         this.id = id;
         this.file = file;
         this.out = new FileOutputStream(file, append);
+        this.singleWrite = singleWrite;
         if (append && file.exists()) {
             long position = file.length();
             this.capacity = Math.max(capacity, position);
@@ -85,7 +93,7 @@ class Chunk {
         return result;
     }
 
-    int available() throws IOException {
+    int available() {
         return (int) Math.max(0, bytesWritten - bytesRead);
     }
 
@@ -109,7 +117,11 @@ class Chunk {
             return 0;
         }
 
-        len = (int) Math.min(len, capacity - bytesWritten);
+        if (singleWrite) {
+            capacity = Math.max(capacity, bytesWritten + len);
+        } else {
+            len = (int) Math.min(len, capacity - bytesWritten);
+        }
         out.write(b, off, len);
         bytesWritten += len;
         notifyReaders();
@@ -117,14 +129,17 @@ class Chunk {
     }
 
     void flush() throws IOException {
-        out.flush();
+        if (out != null) {
+            out.flush();
+        }
     }
 
-    synchronized void waitDataToRead() throws IOException {
+    synchronized void waitDataToRead(long timeout) throws IOException {
         ++readers;
         try {
-            while (!isDone() && !isReadyToRead()) {
-                if (!SyncUtils.waitQuietly(this)) {
+            long stopTime = System.currentTimeMillis() + timeout;
+            while (!isDone() && !isReadyToRead() && stopTime - System.currentTimeMillis() > 0L) {
+                if (!SyncUtils.waitQuietly(this, Math.max(1, stopTime - System.currentTimeMillis()))) {
                     return;
                 }
             }
