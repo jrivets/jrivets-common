@@ -22,7 +22,7 @@ public class ExpandableJournalFunctionalTest {
     private Journal journal;
 
     @BeforeMethod
-    public void setup() throws IOException {
+    public void setup() throws IOException, ChunkNotFoundException {
         Collection<File> files = IOUtils.getFiles(IOUtils.temporaryDirectory, PREFIX);
         for (File file : files) {
             file.delete();
@@ -118,7 +118,7 @@ public class ExpandableJournalFunctionalTest {
     }
     
     @Test(timeOut=10000L)
-    public void noEofTest() throws IOException {
+    public void noEofTest() throws IOException, ChunkNotFoundException {
         journal.close();
         journal = new JournalBuilder().withMaxCapacity(100).withMaxChunkSize(10).withPrefixName(PREFIX)
                 .withFolderName(IOUtils.temporaryDirectory).buildExpandable();
@@ -158,7 +158,7 @@ public class ExpandableJournalFunctionalTest {
     }
     
     @Test
-    public void openCloseEmptyTest() throws IOException {
+    public void openCloseEmptyTest() throws IOException, ChunkNotFoundException {
         byte[] array = getShuffledByteArray(100);
         journal.getOutputStream().write(array);
         byte[] in = new byte[array.length];
@@ -178,7 +178,7 @@ public class ExpandableJournalFunctionalTest {
     }
 
     @Test
-    public void openCloseSomeTest() throws IOException {
+    public void openCloseSomeTest() throws IOException, ChunkNotFoundException {
         byte[] array = getShuffledByteArray(100);
         journal.getOutputStream().write(array);
         journal.getInputStream().mark(100);
@@ -197,7 +197,7 @@ public class ExpandableJournalFunctionalTest {
     }
 
     @Test
-    public void openCloseMarkSomeTest() throws IOException {
+    public void openCloseMarkSomeTest() throws IOException, ChunkNotFoundException {
         byte[] array = getShuffledByteArray(100);
         journal.getOutputStream().write(array);
         
@@ -219,7 +219,7 @@ public class ExpandableJournalFunctionalTest {
     }
     
     @Test
-    public void readAllTest() throws IOException {
+    public void readAllTest() throws IOException, ChunkNotFoundException {
         byte[] array = getShuffledByteArray(100);
         journal.getOutputStream().write(array);
         byte[] in = new byte[array.length];
@@ -235,7 +235,7 @@ public class ExpandableJournalFunctionalTest {
     }
     
     @Test
-    public void shrinkMaxSizeTest() throws IOException {
+    public void shrinkMaxSizeTest() throws IOException, ChunkNotFoundException {
         byte[] array = getShuffledByteArray(100);
         journal.getOutputStream().write(array);
         journal.close();
@@ -247,8 +247,8 @@ public class ExpandableJournalFunctionalTest {
         journal.close();       
     }
     
-    @Test(expectedExceptions = {IllegalStateException.class})
-    public void lostChunkTest() throws IOException {
+    @Test(expectedExceptions = {ChunkNotFoundException.class})
+    public void lostChunkTest() throws IOException, ChunkNotFoundException {
         byte[] array = getShuffledByteArray(100);
         journal.getOutputStream().write(array);
         journal.close();
@@ -262,7 +262,7 @@ public class ExpandableJournalFunctionalTest {
     }
     
     @Test
-    public void cleanUpChunkTest() throws IOException {
+    public void cleanUpChunkTest() throws IOException, ChunkNotFoundException {
         byte[] array = getShuffledByteArray(100);
         journal.getOutputStream().write(array);
         journal.close();
@@ -274,7 +274,7 @@ public class ExpandableJournalFunctionalTest {
     }
     
     @Test(expectedExceptions = {FileNotFoundException.class})
-    public void wrongFolderTest() throws IOException {
+    public void wrongFolderTest() throws IOException, ChunkNotFoundException {
         journal.close();
         journal = new JournalBuilder().withMaxCapacity(20).withMaxChunkSize(5).withPrefixName(PREFIX).cleanAfterOpen()
                 .withFolderName(IOUtils.temporaryDirectory + "1234ka983kjf13hkjahd").buildExpandable();
@@ -282,7 +282,7 @@ public class ExpandableJournalFunctionalTest {
 
     @Ignore
     @Test
-    public void stressTest() throws IOException {
+    public void stressTest() throws IOException, ChunkNotFoundException {
         journal.close();
         long capacity = 1000000000L;
         long chunk = capacity/10;

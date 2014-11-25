@@ -27,14 +27,14 @@ final class ChunkingPolicy extends AbstractChunkingPolicy {
     
     private final boolean singleWrite;
 
-    ChunkingPolicy(long maxCapacity, long maxChunkSize, String folderName, String prefixName, boolean cleanAfterOpen, boolean singleWrite) throws IOException {
+    ChunkingPolicy(long maxCapacity, long maxChunkSize, String folderName, String prefixName, boolean cleanAfterOpen, boolean singleWrite) throws IOException, ChunkNotFoundException {
         super(LoggerFactory.getLogger(ChunkingPolicy.class, "(" + prefixName + ") %2$s", null), maxCapacity, maxChunkSize, folderName, prefixName, cleanAfterOpen);
         this.singleWrite = singleWrite;
         init(cleanAfterOpen);
         logger.info("New ChunkingPolicy: ", this);
     }
 
-    private void init(boolean cleanAfterOpen) throws IOException {
+    private void init(boolean cleanAfterOpen) throws IOException, ChunkNotFoundException {
         JournalInfo journalInfo = cleanAfterOpen ? JournalInfo.NULL_INFO : journalInfoWriter.get();
         if (JournalInfo.NULL_INFO.equals(journalInfo)) {
             newChunk();
@@ -45,7 +45,8 @@ final class ChunkingPolicy extends AbstractChunkingPolicy {
         for (int id = startId; id <= journalInfo.getWriter().getFirst(); id++) {
             File file = new File(folderName, prefixName + id);
             if (!file.exists()) {
-                throw new IllegalStateException("Could not find file-chunk " + file);
+                logger.warn("The chunkId=", id, "(file ", file, ") not found.");
+                throw new ChunkNotFoundException(id);
             }
             long capacity = file.length();
             Chunk chunk = new Chunk(id, capacity, file, true, singleWrite);

@@ -160,8 +160,9 @@ public final class JournalBuilder {
      * 
      * @return
      * @throws IOException
+     * @throws ChunkNotFoundException 
      */
-    public Journal buildExpandable() throws IOException {
+    public Journal buildExpandable() throws IOException, ChunkNotFoundException {
         if (maxChunkSize > maxCapacity) {
             throw new IllegalArgumentException("maxChunksSize=" + maxChunkSize
                     + " should not be greater than maxCapacity=" + maxCapacity);
