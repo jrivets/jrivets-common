@@ -41,7 +41,7 @@ public final class RingBuffer<T> implements Queue<T>, Serializable {
     private transient int headIdx;
 
     private transient int tailIdx;
-
+    
     private class BufferIterator implements Iterator<T> {
 
         private int idx;
