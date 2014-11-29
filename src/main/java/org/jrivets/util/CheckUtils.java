@@ -1,6 +1,6 @@
 package org.jrivets.util;
 
-public final class CheckUtils {
+public final class CheckUtils extends StaticSingleton {
 
     public static void arrayBounds(int arrayLength, int offset, int length) {
         if (offset < 0 || length < 0 || length > arrayLength - offset) {

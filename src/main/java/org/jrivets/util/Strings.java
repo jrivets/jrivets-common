@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class Strings {
+public final class Strings extends StaticSingleton {
 
     public static boolean isNullOrEmpty(String str) {
         return str == null || str.length() == 0 || str.trim().length() == 0;

@@ -1,6 +1,6 @@
 package org.jrivets.util;
 
-public final class SyncUtils {
+public final class SyncUtils extends StaticSingleton {
 
     public static boolean waitQuietly(Object o) {
         return waitQuietly(o, 0L);

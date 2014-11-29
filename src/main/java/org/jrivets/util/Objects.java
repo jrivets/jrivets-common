@@ -1,6 +1,6 @@
 package org.jrivets.util;
 
-public final class Objects {
+public final class Objects extends StaticSingleton {
 
     public static boolean equal(Object o1, Object o2) {
         return o1 == o2 || (o1 != null && o1.equals(o2));

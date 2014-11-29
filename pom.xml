@@ -48,7 +48,6 @@
 						<arg>-Xlint:all</arg>
 						<arg>-Werror</arg>
 					</compilerArgs>
-					<compilerArgument>-Xlint:all</compilerArgument>
 				</configuration>
 			</plugin>
 		</plugins>
