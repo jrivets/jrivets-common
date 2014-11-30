@@ -54,6 +54,9 @@ public class PropertiesUtilsTest {
     @Test
     public void addOrOverrideTest() {
         Properties p = PropertiesUtils.loadFromResourceQuietly("properties.test");
+        PropertiesUtils.addOrOverrideProps(p, null);
+        assertEquals(p.get("prop1"), "abc");
+        assertEquals(p.get("prop2"), "cde");
         
         Properties p2 = new Properties();
         p2.put("prop2", "ov");

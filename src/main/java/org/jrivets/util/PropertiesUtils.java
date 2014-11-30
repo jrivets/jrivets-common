@@ -21,7 +21,7 @@ public final class PropertiesUtils extends StaticSingleton {
         try {
             return loadFromResource(resourceFileName);
         } catch(IOException ioe) {
-            logger.error("Cannot load properties from file " + resourceFileName, ioe);
+            logger.error("Cannot load properties from file " + resourceFileName + " " + ioe.getMessage());
         }
         return null;
     }
@@ -34,14 +34,16 @@ public final class PropertiesUtils extends StaticSingleton {
         try {
             return loadFromFile(fileName);
         } catch(IOException ioe) {
-            logger.error("Cannot load properties from file " + fileName, ioe);
+            logger.error("Cannot load properties from file " + fileName + " " + ioe.getMessage());
         }
         return null;
     }
     
     public static Properties addOrOverrideProps(Properties to, Properties from) {
-        for (Object key: from.keySet()) {
-            to.put(key, from.get(key));
+        if (from != null) {
+            for (Object key: from.keySet()) {
+                to.put(key, from.get(key));
+            }
         }
         return to;
     }
