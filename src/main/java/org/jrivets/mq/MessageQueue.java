@@ -1,5 +1,7 @@
 package org.jrivets.mq;
 
+import org.jrivets.util.OverflowException;
+
 
 public interface MessageQueue {
 

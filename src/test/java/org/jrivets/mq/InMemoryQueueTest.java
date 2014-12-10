@@ -9,6 +9,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jrivets.util.OverflowException;
 import org.testng.annotations.Test;
 
 public class InMemoryQueueTest {

@@ -5,6 +5,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.jrivets.util.OverflowException;
+
 final class InMemoryFifoQueue implements MessageQueue {
 
     final int maxSize;
