@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.jrivets.util.SyncUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -16,9 +17,10 @@ public class ChunkTest {
 
     private Chunk chunk;
 
-    private volatile int readers;
-
     class ReadWaiter implements Runnable {
+        
+        private volatile int readers;
+        
         @Override
         public void run() {
             try {
@@ -29,6 +31,13 @@ public class ChunkTest {
             } finally {
                 readers--;
             }
+        }
+        
+        void waitForReader() {
+            while (readers == 0) {
+                Thread.yield();
+            }
+            SyncUtils.sleepQuietly(10L);
         }
     };
 
@@ -243,36 +252,21 @@ public class ChunkTest {
     @Test(timeOut = 10000L)
     public void readNotificationTest() throws IOException, InterruptedException {
         chunk = new Chunk(1, 3, testFile, false, false);
-        Thread t = new Thread(new ReadWaiter());
+        ReadWaiter rw = new ReadWaiter();
+        Thread t = new Thread(rw);
         t.start();
-        while (readers == 0) {
-            Thread.yield();
-        }
+        rw.waitForReader();
         chunk.write(1);
         t.join();
     }
 
-    @Test(timeOut = 10000L)
+    @Test(timeOut = 5000L)
     public void batchReadNotificationTest() throws IOException, InterruptedException {
         chunk = new Chunk(1, 3, testFile, false, false);
-        Thread t = new Thread(new ReadWaiter());
+        ReadWaiter rw = new ReadWaiter();
+        Thread t = new Thread(rw);
         t.start();
-        while (readers == 0) {
-            Thread.yield();
-        }
-        byte[] data = new byte[] { 1, 2, 3, 4 };
-        assertEquals(chunk.write(data, 0, 4), 3);
-        t.join();
-    }
-
-    @Test(timeOut = 10000L)
-    public void isDoneReadNotificationTest() throws IOException, InterruptedException {
-        chunk = new Chunk(1, 3, testFile, false, false);
-        Thread t = new Thread(new ReadWaiter());
-        t.start();
-        while (readers == 0) {
-            Thread.yield();
-        }
+        rw.waitForReader();
         byte[] data = new byte[] { 1, 2, 3, 4 };
         assertEquals(chunk.write(data, 0, 4), 3);
         t.join();
