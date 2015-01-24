@@ -18,6 +18,9 @@ public class SubscriberTypeParserTest {
     
     class SimpleSimpleEvent extends SimpleEvent {
     }
+    
+    class SimpleSimpleEvent2 extends SimpleEvent {
+    }
 
     class SimpleEventSubscriber {
         @OnEvent
@@ -88,6 +91,8 @@ public class SubscriberTypeParserTest {
         SubscriberTypeDetails details = typeParser.getSubscriberTypeDetails(NotSimpleEventSubscriber.class);
         assertEquals(2, details.getEventsMap().size());
         assertNotNull(details.getMethod(new SimpleEvent()));
+        // Events are matched by exact class
+        assertNull(details.getMethod(new SimpleSimpleEvent2()));
         assertNull(details.getMethod(new Object() {}));
         
         Method m = details.getMethod(new SimpleSimpleEvent());

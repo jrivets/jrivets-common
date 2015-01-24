@@ -14,20 +14,10 @@ public final class UID {
 
     private final Object uid;
     
-    private int hashCode;
+    private transient int hashCode;
     
-    public UID(UUID guid) {
-        this.uid = guid;
-        assertNotNullUid();
-    }
-
-    public UID(Long lid) {
-        this.uid = lid;
-        assertNotNullUid();
-    }
-
-    public UID(String sid) {
-        this.uid = sid;
+    public UID(Object id) {
+        this.uid = id;
         assertNotNullUid();
     }
 
