@@ -73,11 +73,6 @@ public final class UID {
         }
         return hashCode;
     }
-
-    @Override
-    public String toString() {
-        return uid.toString();
-    }
     
     public static UID getUID(String s, Class<?> clazz) {
         if (clazz == String.class) {
@@ -93,9 +88,19 @@ public final class UID {
                 + " should be one of the types: String, UUID or Long");
     }
 
+    public static UID randomUID() {
+        return new UID(UUID.randomUUID());
+    }
+
     private void assertNotNullUid() {
         if (uid == null) {
             throw new NullPointerException();
         }
     }
+
+    @Override
+    public String toString() {
+        return uid.toString();
+    }
+
 }
