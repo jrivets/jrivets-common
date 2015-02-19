@@ -67,4 +67,5 @@ public class PropertiesUtilsTest {
         assertEquals(p.get("prop2"), "ov");
         assertEquals(p.get("prop3"), "p3");
     }
+    
 }

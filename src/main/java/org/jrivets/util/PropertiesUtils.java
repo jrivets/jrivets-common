@@ -1,9 +1,15 @@
 package org.jrivets.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.jrivets.log.Logger;
@@ -46,6 +52,36 @@ public final class PropertiesUtils extends StaticSingleton {
             }
         }
         return to;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <V> Map<String, V> toMap(Properties props) {
+        HashMap<String, V> result = new HashMap<>();
+        for (String name: props.stringPropertyNames()) {
+            result.put(name, (V) props.getProperty(name));
+        }
+        return result;
+    }
+    
+    public static List<String> scanPathForFile(String fileName) {
+        String sysPath = System.getenv("PATH");
+        if (sysPath == null) {
+            return Collections.emptyList();
+        }
+        
+        String[] filePaths = sysPath.split(File.pathSeparator);
+        if (filePaths == null) {
+            return Collections.emptyList();
+        }
+
+        ArrayList<String> result = new ArrayList<String>(5);
+        for (String path: filePaths) {
+            String fullName = path + File.separator + fileName;
+            if (new File(fullName).exists()) {
+                result.add(fullName);
+            }
+        }
+        return result;
     }
     
     private static Properties loadFrom(String fileName, boolean resource) throws IOException {
