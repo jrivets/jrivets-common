@@ -17,6 +17,16 @@ public class UIDTest {
     }
     
     @Test
+    public void checkSerializationGUID2() {
+        UUID g = UUID.randomUUID();
+        UID u = new UID(g);
+        String su = u.toString();
+        UID u1 = new UID(su);
+        assertEquals(u, u1);
+        assertEquals(u.hashCode(), u1.hashCode());
+    }
+    
+    @Test
     public void checkSerializationLong() {
         Long l = 123456789L;
         UID u = new UID(l);
