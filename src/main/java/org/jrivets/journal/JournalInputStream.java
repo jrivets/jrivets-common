@@ -16,7 +16,7 @@ import org.jrivets.util.CheckUtils;
  * <code>close</code> method invocation will not take effect, so to close the
  * stream properly <code>Journal.close</code> should be invoked instead.
  * 
- * @author Dmitry Spasibenko (dmitry.spasibenko@mulesoft.com)
+ * @author Dmitry Spasibenko 
  *
  */
 public final class JournalInputStream extends InputStream {
