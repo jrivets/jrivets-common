@@ -118,12 +118,15 @@ public final class MockUtils {
         }
     }
 
-    public static <E> String getAnnotatedField(Class<E> clazz, Class<? extends Annotation> annotationClass) {
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field f : fields) {
-            if (f.getAnnotation(annotationClass) != null) {
-                return f.getName();
+    public static String getAnnotatedField(Class<?> clazz, Class<? extends Annotation> annotationClass) {
+        while (clazz != null) {
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field f : fields) {
+                if (f.getAnnotation(annotationClass) != null) {
+                    return f.getName();
+                }
             }
+            clazz = clazz.getSuperclass();
         }
         return null;
     }
