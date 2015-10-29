@@ -1,8 +1,14 @@
 package org.jrivets.event;
 
+import java.util.Collection;
 import java.util.concurrent.Executor;
 
+import org.jrivets.log.Logger;
+import org.jrivets.log.LoggerFactory;
+
 public class AsyncEventChannel implements EventChannel {
+    
+    private final Logger logger = LoggerFactory.getLogger(AsyncEventChannel.class);
 
     private final SubscribersRegistry subscribersRegistry;
     
@@ -16,8 +22,19 @@ public class AsyncEventChannel implements EventChannel {
     @Override
     public boolean publish(final Object e) {
         executor.execute(() -> {
-            for (Subscriber subscriber : subscribersRegistry.getSubscribers()) {
-                subscriber.notifySubscriberSilently(e);
+            int skip = 0;
+            Collection<Subscriber> subscribers = subscribersRegistry.getSubscribers();
+            for (Subscriber subscriber : subscribers) {
+                try {
+                    if (Subscriber.NO_SUCH_METHOD == subscriber.notifySubscriberIfMethodExists(e)) {
+                        ++skip;
+                    }
+                } catch (Exception ex) {
+                    logger.error("Got the error while delivering notification about event=", e, " to ", subscriber, ex);
+                }
+            }
+            if (skip == subscribers.size()) {
+                onNoSubscribers(e);
             }
         });
         return true;
@@ -33,4 +50,7 @@ public class AsyncEventChannel implements EventChannel {
         subscribersRegistry.unsubscribe(subscriber);
     }
 
+    protected void onNoSubscribers(Object e) {
+        
+    }
 }

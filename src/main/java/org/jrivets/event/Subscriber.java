@@ -10,7 +10,7 @@ public final class Subscriber {
 
     private final SubscriberTypeDetails typeDetails;
     
-    private static final Object NO_SUCH_METHOD = new Object();
+    public static final Object NO_SUCH_METHOD = new Object();
 
     Subscriber(Object subscriber, SubscriberTypeDetails typeDetails) {
         this.subscriber = subscriber;
@@ -41,7 +41,7 @@ public final class Subscriber {
         }
     }
 
-    Object notifySubscriberIfMethodExists(Object e) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public Object notifySubscriberIfMethodExists(Object e) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         Method m = typeDetails.getMethod(e);
         if (m != null) {
             return m.invoke(subscriber, e);
