@@ -144,6 +144,8 @@ public class LimitedKeyValueHolder<K, V> {
     }
     
     public V remove(K key) {
+        long now = System.currentTimeMillis();
+        sweep(now);
         Holder removed = null;
         lock.lock();
         try {
