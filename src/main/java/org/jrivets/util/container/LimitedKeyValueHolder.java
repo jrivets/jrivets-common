@@ -187,6 +187,7 @@ public class LimitedKeyValueHolder<K, V> {
             List<Holder> removed = new ArrayList<Holder>();
             try (CloseableLock l = lock.autounlock()) {
                 if (timeMillis - nextSweepTimeMillis >= 0L) {
+                    nextSweepTimeMillis = timeMillis + sweepTimeout;
                     if (!holders.isEmpty()) {
                         Iterator<Map.Entry<K, Holder>> it = holders.entrySet().iterator();
                         while (it.hasNext()) {
@@ -196,10 +197,11 @@ public class LimitedKeyValueHolder<K, V> {
                                 it.remove();
                                 removed.add(holder);
                                 sortedSet.remove(holder);
+                            } else if (holder.lastTouch + holder.ttl < nextSweepTimeMillis) {
+                                nextSweepTimeMillis = holder.lastTouch + holder.ttl;
                             }
                         }
                     }
-                    nextSweepTimeMillis = timeMillis + sweepTimeout;
                 }
             }
             onRemoved(removed);
@@ -221,6 +223,10 @@ public class LimitedKeyValueHolder<K, V> {
         holders.put(key, h);
         sortedSet.add(h);
 
+        if (nextSweepTimeMillis > now + ttl/2) {
+            nextSweepTimeMillis = now + ttl/2;
+        }
+        
         if (holders.size() > maxSize) {
             removed = sortedSet.first();
             sortedSet.remove(removed);
