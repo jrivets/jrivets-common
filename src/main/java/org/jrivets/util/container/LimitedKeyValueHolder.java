@@ -53,11 +53,13 @@ public class LimitedKeyValueHolder<K, V> {
     protected class Holder {
         public final K key;
         public final V value;
+        public final long ttl;
         long lastTouch;
 
-        Holder(K key, V value, long lastTouch) {
+        Holder(K key, V value, long ttl, long lastTouch) {
             this.key = key;
             this.value = value;
+            this.ttl = ttl;
             this.lastTouch = lastTouch;
         }
     }
@@ -111,8 +113,9 @@ public class LimitedKeyValueHolder<K, V> {
      *
      * @param key
      * @param value
+     * @param ttl - timeout (Milliseconds).
      */
-    public void put(K key, V value) {
+    public void put(K key, V value, long ttl) {
         long now = System.currentTimeMillis();
         sweep(now);
         Holder removed = null;
@@ -128,7 +131,7 @@ public class LimitedKeyValueHolder<K, V> {
                 holders.remove(h.key);
                 removed = h;
             }
-            Holder oversized = putUnsafe(key, value, now);
+            Holder oversized = putUnsafe(key, value, ttl, now);
             removed = removed != null ? removed : oversized;
         } finally {
             lock.unlock();
@@ -136,6 +139,10 @@ public class LimitedKeyValueHolder<K, V> {
         }
     }
 
+    public void put(K key, V value) {
+        put(key, value, timeout);
+    }
+    
     public V remove(K key) {
         Holder removed = null;
         lock.lock();
@@ -183,7 +190,7 @@ public class LimitedKeyValueHolder<K, V> {
                         while (it.hasNext()) {
                             Map.Entry<K, Holder> e = it.next();
                             Holder holder = e.getValue();
-                            if (timeMillis - holder.lastTouch >= timeout) {
+                            if (timeMillis - holder.lastTouch >= holder.ttl) {
                                 it.remove();
                                 removed.add(holder);
                                 sortedSet.remove(holder);
@@ -206,8 +213,8 @@ public class LimitedKeyValueHolder<K, V> {
      * @param now
      * @return
      */
-    protected Holder putUnsafe(K key, V value, long now) {
-        Holder h = new Holder(key, value, now);
+    protected Holder putUnsafe(K key, V value, long ttl, long now) {
+        Holder h = new Holder(key, value, ttl, now);
         Holder removed = null;
         holders.put(key, h);
         sortedSet.add(h);
