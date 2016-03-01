@@ -70,7 +70,7 @@ public final class FileUtils {
         cleanDirectory(directory);
         Files.delete(Paths.get(directory.getAbsolutePath()));
     }
-
+    
     public static void cleanDirectory(File directory) throws IOException {
         if (!directory.isDirectory()) {
             throw new IllegalArgumentException(directory + " is not a directory");

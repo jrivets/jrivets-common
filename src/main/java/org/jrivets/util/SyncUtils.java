@@ -27,4 +27,17 @@ public final class SyncUtils extends StaticSingleton {
         }
         return true;
     }
+    
+    public interface Op {
+        void run() throws Exception;
+    }
+    
+    public static Exception runQuietly(Op r) {
+        try {
+            r.run();
+            return null;
+        } catch (Exception e) {
+            return e;
+        }
+    }
 }
